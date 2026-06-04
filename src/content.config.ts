@@ -20,4 +20,32 @@ const blog = defineCollection({
     }),
 });
 
-export const collections = { blog };
+// 3D works/portfolio. The gallery shows a lightweight GIF thumbnail; the
+// interactive model only loads on the per-work detail page.
+const works = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/works' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    model: z.string(), // .glb filename in public/models/
+    thumb: z.string(), // .gif/.png/.webp filename in public/works/
+    environment: z
+      .enum([
+        'apartment',
+        'city',
+        'dawn',
+        'forest',
+        'lobby',
+        'night',
+        'park',
+        'studio',
+        'sunset',
+        'warehouse',
+      ])
+      .default('city'),
+    order: z.number().default(0),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { blog, works };

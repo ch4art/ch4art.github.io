@@ -9,10 +9,10 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
   .slice(0, 4);
 
-const featured = [
-  { src: modelUrl('avocado.glb'), env: 'sunset', title: '酪梨 Avocado' },
-  { src: modelUrl('toycar.glb'), env: 'park', title: '玩具車 Toy Car' },
-] as const;
+const featuredWorks = (await getCollection('works'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .filter((w) => w.id !== 'duck')
+  .slice(0, 2);
 ---
 
 <BaseLayout title="首頁">
@@ -49,13 +49,19 @@ const featured = [
     </div>
     <div class="grid gap-6 sm:grid-cols-2">
       {
-        featured.map((m) => (
-          <figure class="card-pop p-3">
-            <div style="height: 280px;">
-              <ModelViewer client:only="react" src={m.src} environment={m.env} height="100%" />
-            </div>
-            <figcaption class="font-display text-center mt-3 text-lg text-ink">{m.title}</figcaption>
-          </figure>
+        featuredWorks.map((w) => (
+          <a href={withBase(`portfolio/${w.id}`)} class="card-pop anim-wiggle p-3 block">
+            <img
+              src={withBase(`works/${w.data.thumb}`)}
+              alt={w.data.title}
+              loading="lazy"
+              width="300"
+              height="300"
+              class="w-full rounded-blob"
+              style="aspect-ratio:1/1;object-fit:contain;background:#FFF0F6;"
+            />
+            <p class="font-display text-center mt-3 text-lg text-ink">{w.data.title}</p>
+          </a>
         ))
       }
     </div>

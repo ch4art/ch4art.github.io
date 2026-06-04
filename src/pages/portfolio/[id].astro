@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ModelViewer from '../../components/three/ModelViewer.tsx';
+import { getCollection, render } from 'astro:content';
+import { modelUrl } from '../../lib/model';
+import { withBase } from '../../lib/withBase';
+
+export async function getStaticPaths() {
+  const works = await getCollection('works');
+  return works.map((w) => ({ params: { id: w.id }, props: { work: w } }));
+}
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+---
+
+<BaseLayout title={work.data.title} description={work.data.description}>
+  <a href={withBase('portfolio')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回作品集</a>
+
+  <h1 class="sticker title-pop text-4xl mt-5">{work.data.title}</h1>
+  <p class="text-ink/80 font-bold mt-2">{work.data.description}</p>
+
+  {
+    work.data.tags.length > 0 && (
+      <ul class="flex flex-wrap gap-2 mt-3">
+        {work.data.tags.map((t) => (
+          <li class="text-xs font-bold px-3 py-1 rounded-pill bg-lavender text-ink border-2 border-outline">
+            #{t}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  <div class="card-pop mt-6 p-3" style="height: 460px;">
+    <ModelViewer
+      client:only="react"
+      src={modelUrl(work.data.model)}
+      environment={work.data.environment}
+      height="100%"
+    />
+  </div>
+  <p class="text-center text-sm text-ink/60 font-bold mt-3">🖱️ 拖曳旋轉 · 滾輪縮放 · 右鍵 / 兩指平移</p>
+
+  <div class="post-body mt-8">
+    <Content />
+  </div>
+</BaseLayout>
