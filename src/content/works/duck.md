@@ -1,6 +1,6 @@
 ---
 title: "duck"
-description: "duck 2"
+description: "kkk"
 model: duck.glb
 thumb: duck.gif
 environment: city
