@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+/* ===================================================================
+   Design tokens — Sanrio-cute × Memphis × cartoon.
+   Each @theme var is BOTH a CSS variable AND a Tailwind utility
+   (bg-bubblegum, text-ink, rounded-blob, shadow-pop, font-display…).
+   =================================================================== */
+@theme {
+  /* Sanrio pastels */
+  --color-cream:          #FFF7F2;
+  --color-bubblegum:      #FF9FCB;
+  --color-bubblegum-deep: #F2569E;
+  --color-skyberry:       #9AD3FF;
+  --color-mint:           #A6F0CE;
+  --color-butter:         #FFE27A;
+  --color-lavender:       #D8C7FF;
+  --color-coral:          #FFB59E;
+
+  /* Memphis pops (saturated accents) */
+  --color-grape:          #9B6DFF;
+  --color-tangerine:      #FF8A5B;
+  --color-aqua:           #5FE0DA;
+
+  --color-ink:            #4A3A55;
+  --color-outline:        #3A2E45; /* cartoon outline (soft near-black) */
+
+  /* Radii */
+  --radius-soft: 1rem;
+  --radius-pill: 9999px;
+  --radius-blob: 1.75rem;
+
+  /* Shadows — Memphis/cartoon HARD offset shadows (no blur) */
+  --shadow-soft:   0 8px 24px -8px rgba(242, 86, 158, 0.35);
+  --shadow-pop:    5px 5px 0 0 var(--color-outline);
+  --shadow-pop-sm: 3px 3px 0 0 var(--color-outline);
+
+  /* Fonts */
+  --font-display: "Fredoka Variable", "Baloo 2 Variable", system-ui, sans-serif;
+  --font-body:    "Nunito Variable", "Quicksand Variable", system-ui, sans-serif;
+}
+
+/* ===================================================================
+   Base
+   =================================================================== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-cream);
+  /* faint Memphis polka-dot grid behind everything */
+  background-image: radial-gradient(rgba(255, 159, 203, 0.22) 1.7px, transparent 1.7px);
+  background-size: 26px 26px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* ===================================================================
+   Cartoon / Memphis components
+   =================================================================== */
+@layer components {
+  /* Chunky outlined card with a hard offset shadow. */
+  .card-pop {
+    background: #fff;
+    border: 3px solid var(--color-outline);
+    border-radius: var(--radius-blob);
+    box-shadow: var(--shadow-pop);
+  }
+
+  /* Cartoon pill button: outline + hard shadow that "presses" on click. */
+  .btn-pop {
+    display: inline-block;
+    font-family: var(--font-display);
+    border: 3px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-pop-sm);
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  .btn-pop:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 0 var(--color-outline);
+  }
+  .btn-pop:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 0 var(--color-outline);
+  }
+
+  /* Sticker-style chunky title: white fill, dark outline, colored drop. */
+  .title-pop {
+    font-family: var(--font-display);
+    color: #fff;
+    -webkit-text-stroke: 2.5px var(--color-outline);
+    paint-order: stroke fill;
+    text-shadow: 4px 4px 0 var(--color-bubblegum-deep);
+    line-height: 1.1;
+  }
+
+  /* Slight playful tilt, like a peeled sticker. */
+  .sticker {
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+}
+
+/* ===================================================================
+   Animations (motion-safe only)
+   =================================================================== */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-float {
+    animation: floaty 6s ease-in-out infinite;
+  }
+  .anim-wiggle:hover {
+    animation: wiggle 0.45s ease-in-out;
+  }
+  .anim-spin {
+    animation: spin-slow 16s linear infinite;
+  }
+}
+
+/* ===================================================================
+   Rendered Markdown / MDX post body (.md/.mdx has no utility classes)
+   =================================================================== */
+.post-body {
+  line-height: 1.8;
+}
+.post-body :where(h2) {
+  font-family: var(--font-display);
+  color: var(--color-bubblegum-deep);
+  font-size: 1.6rem;
+  margin: 1.8rem 0 0.6rem;
+}
+.post-body :where(h3) {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  font-size: 1.25rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.post-body :where(p) {
+  margin: 0.85rem 0;
+}
+.post-body :where(ul, ol) {
+  margin: 0.85rem 0;
+  padding-left: 1.4rem;
+  list-style: revert;
+}
+.post-body :where(a) {
+  color: var(--color-bubblegum-deep);
+  text-decoration: underline;
+  font-weight: 700;
+}
+.post-body :where(img) {
+  border-radius: var(--radius-blob);
+  border: 3px solid var(--color-outline);
+  box-shadow: var(--shadow-pop);
+  margin: 1rem 0;
+}
+.post-body :where(code) {
+  background: #fff0f6;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid var(--color-bubblegum);
+  font-size: 0.9em;
+}
+.post-body :where(pre) {
+  background: #2b2233;
+  color: #fdeef6;
+  padding: 1rem;
+  border-radius: var(--radius-soft);
+  border: 3px solid var(--color-outline);
+  overflow-x: auto;
+}
+.post-body :where(pre code) {
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+.post-body :where(blockquote) {
+  border-left: 5px solid var(--color-bubblegum);
+  padding: 0.2rem 0 0.2rem 1rem;
+  color: var(--color-ink);
+  opacity: 0.9;
+}

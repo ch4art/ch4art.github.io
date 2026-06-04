@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/withBase';
+---
+
+<BaseLayout title="找不到頁面">
+  <section class="text-center py-16">
+    <h1 class="sticker title-pop text-8xl">404</h1>
+    <p class="mt-6 text-lg text-ink/80 font-bold">哎呀,這個頁面跑掉了 🫧</p>
+    <a href={withBase('')} class="btn-pop anim-wiggle bg-bubblegum text-ink text-lg px-7 py-3 mt-8">
+      回首頁
+    </a>
+  </section>
+</BaseLayout>

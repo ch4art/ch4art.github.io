@@ -1,0 +1,40 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@fontsource-variable/fredoka';
+import '@fontsource-variable/baloo-2';
+import '@fontsource-variable/quicksand';
+import '@fontsource-variable/nunito';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Decor from '../components/Decor.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Cute 3D Art',
+  description = '可愛的藝術與 3D 建模作品集 + 部落格',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <!-- favicon is a public/ file → needs the base prefix -->
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <title>{title}</title>
+    <ClientRouter />
+  </head>
+  <body class="bg-cream text-ink font-body min-h-screen">
+    <Decor />
+    <Nav />
+    <main class="relative z-10 mx-auto max-w-5xl px-4 py-8">
+      <slot />
+    </main>
+  </body>
+</html>

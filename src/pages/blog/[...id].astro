@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import { withBase } from '../../lib/withBase';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  // Astro 5+/6: route param is `id` (not `slug`). The [...id] rest param
+  // also handles ids that contain "/".
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+// Astro 5+/6: standalone render(post), NOT post.render().
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="mx-auto max-w-3xl">
+    <a href={withBase('blog')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回部落格</a>
+    <h1 class="sticker title-pop text-4xl mt-5">{post.data.title}</h1>
+    <p class="text-ink/60 font-bold mt-2">{post.data.pubDate.toLocaleDateString('zh-TW')}</p>
+
+    {
+      post.data.heroImage && (
+        // astro:assets <Image> auto-handles the base path — do NOT wrap in withBase.
+        <Image
+          src={post.data.heroImage}
+          alt={post.data.heroImageAlt ?? ''}
+          class="rounded-blob shadow-soft my-5 w-full h-auto"
+        />
+      )
+    }
+
+    <div class="post-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

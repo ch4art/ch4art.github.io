@@ -1,0 +1,124 @@
+---
+// Decorative Memphis / Sanrio scatter layer. Purely visual, non-interactive.
+// Shapes use currentColor; the outer span sets color + rotation, an inner span
+// does the float animation (so rotate and translateY don't clash).
+type Shape = {
+  type: 'squiggle' | 'zigzag' | 'star' | 'ring' | 'dot' | 'triangle' | 'cross' | 'half' | 'dots3';
+  top: string;
+  left: string;
+  w: number;
+  h?: number;
+  color: string;
+  rot?: number;
+  delay?: string;
+};
+
+const shapes: Shape[] = [
+  { type: 'squiggle', top: '5%', left: '2%', w: 96, h: 28, color: 'var(--color-grape)', rot: -10, delay: '0s' },
+  { type: 'star', top: '18%', left: '7%', w: 48, color: 'var(--color-bubblegum-deep)', rot: 8, delay: '1.1s' },
+  { type: 'zigzag', top: '40%', left: '3%', w: 88, h: 26, color: 'var(--color-aqua)', rot: 0, delay: '.9s' },
+  { type: 'cross', top: '60%', left: '6%', w: 36, color: 'var(--color-tangerine)', rot: 0, delay: '.2s' },
+  { type: 'dots3', top: '80%', left: '4%', w: 74, h: 28, color: 'var(--color-grape)', rot: -4, delay: '.5s' },
+  { type: 'ring', top: '30%', left: '90%', w: 66, color: 'var(--color-skyberry)', rot: 0, delay: '.3s' },
+  { type: 'triangle', top: '50%', left: '92%', w: 42, color: 'var(--color-butter)', rot: 12, delay: '1.4s' },
+  { type: 'half', top: '69%', left: '89%', w: 62, h: 31, color: 'var(--color-coral)', rot: 18, delay: '1s' },
+  { type: 'star', top: '85%', left: '90%', w: 40, color: 'var(--color-butter)', rot: -6, delay: '1.3s' },
+  { type: 'dot', top: '13%', left: '93%', w: 22, color: 'var(--color-tangerine)', rot: 0, delay: '.6s' },
+  { type: 'ring', top: '6%', left: '58%', w: 40, color: 'var(--color-bubblegum)', rot: 0, delay: '1.2s' },
+  { type: 'triangle', top: '8%', left: '80%', w: 34, color: 'var(--color-skyberry)', rot: -10, delay: '.8s' },
+  { type: 'squiggle', top: '93%', left: '42%', w: 96, h: 28, color: 'var(--color-aqua)', rot: 0, delay: '.7s' },
+  { type: 'dot', top: '40%', left: '52%', w: 16, color: 'var(--color-grape)', rot: 0, delay: '.4s' },
+];
+---
+
+<div class="decor" aria-hidden="true">
+  {
+    shapes.map((s) => (
+      <span
+        class="decor-item"
+        style={`top:${s.top};left:${s.left};width:${s.w}px;height:${s.h ?? s.w}px;color:${s.color};--rot:${s.rot ?? 0}deg;`}
+      >
+        <span class="decor-float" style={`animation-delay:${s.delay ?? '0s'};`}>
+          {s.type === 'squiggle' && (
+            <svg viewBox="0 0 100 24" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round">
+              <path d="M3 12 Q 15 1 27 12 T 51 12 T 75 12 T 99 12" />
+            </svg>
+          )}
+          {s.type === 'zigzag' && (
+            <svg viewBox="0 0 100 24" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 5 L 19 19 L 35 5 L 51 19 L 67 5 L 83 19 L 97 5" />
+            </svg>
+          )}
+          {s.type === 'star' && (
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <path d="M50 4 C56 38 62 44 96 50 C62 56 56 62 50 96 C44 62 38 56 4 50 C38 44 44 38 50 4 Z" />
+            </svg>
+          )}
+          {s.type === 'ring' && (
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="10">
+              <circle cx="50" cy="50" r="42" />
+            </svg>
+          )}
+          {s.type === 'dot' && (
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <circle cx="50" cy="50" r="44" />
+            </svg>
+          )}
+          {s.type === 'triangle' && (
+            <svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round">
+              <path d="M50 12 L 88 84 L 12 84 Z" />
+            </svg>
+          )}
+          {s.type === 'cross' && (
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <path d="M40 8 H60 V40 H92 V60 H60 V92 H40 V60 H8 V40 H40 Z" />
+            </svg>
+          )}
+          {s.type === 'half' && (
+            <svg viewBox="0 0 100 50" fill="currentColor">
+              <path d="M2 48 A48 48 0 0 1 98 48 Z" />
+            </svg>
+          )}
+          {s.type === 'dots3' && (
+            <svg viewBox="0 0 100 40" fill="currentColor">
+              <circle cx="15" cy="20" r="12" />
+              <circle cx="50" cy="20" r="12" />
+              <circle cx="85" cy="20" r="12" />
+            </svg>
+          )}
+        </span>
+      </span>
+    ))
+  }
+</div>
+
+<style>
+  .decor {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .decor-item {
+    position: absolute;
+    display: block;
+    transform: rotate(var(--rot, 0deg));
+    opacity: 0.92;
+  }
+  .decor-float {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .decor-float svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .decor-float {
+      animation: floaty 6s ease-in-out infinite;
+    }
+  }
+</style>

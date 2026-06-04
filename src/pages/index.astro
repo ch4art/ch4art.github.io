@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ModelViewer from '../components/three/ModelViewer.tsx';
+import { modelUrl } from '../lib/model';
+---
+
+<BaseLayout title="首頁">
+  <section class="text-center">
+    <p class="font-display text-bubblegum-deep text-lg tracking-widest">✦ ✿ welcome ✿ ✦</p>
+    <h1 class="sticker title-pop text-6xl mt-2">我的可愛 3D 工作室</h1>
+    <p class="mt-5 text-lg text-ink/80 font-bold">
+      轉一轉模型、看看作品、讀讀部落格,跟我打聲招呼吧!✨
+    </p>
+
+    <div class="card-pop mt-10 max-w-2xl mx-auto p-3" style="height: 480px;">
+      <ModelViewer
+        client:only="react"
+        src={modelUrl('duck.glb')}
+        environment="sunset"
+        height="100%"
+      />
+    </div>
+    <p class="mt-5 text-sm text-ink/60 font-bold">🖱️ 拖曳旋轉 · 滾輪縮放 · 右鍵 / 兩指平移</p>
+  </section>
+</BaseLayout>

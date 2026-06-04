@@ -1,0 +1,26 @@
+---
+title: "哈囉!我的第一篇 3D 文章"
+description: "示範如何在部落格文章裡嵌入可旋轉、縮放、平移的 3D 模型。"
+pubDate: 2026-06-01
+tags: ["3d", "教學", "cute"]
+draft: false
+---
+
+import ModelViewer from '../../components/three/ModelViewer.tsx';
+
+歡迎來到我的小天地!👋
+下面這隻小鴨是**範例模型**——**拖曳**旋轉、**滾輪**縮放、**右鍵拖曳(或兩指)**平移:
+
+<ModelViewer client:only="react" src={`${import.meta.env.BASE_URL}models/duck.glb`} environment="city" />
+
+## 怎麼自己發一篇文章?
+
+1. 在 `src/content/blog/` 丟一個新檔案。
+2. 純文字文章用 `.md`;想在文章裡放會動的 3D 模型,就用 `.mdx`。
+3. 填好開頭的 frontmatter(標題、描述、日期、標籤),存檔 → commit → push,就自動上線了。
+
+## 怎麼放自己的 3D 模型?
+
+把你的 `.glb` 丟進 `raw-models/`,執行 `npm run optimize`,壓縮後會出現在 `public/models/`,再用一行嵌進文章即可。
+
+> 這些都是範例模型(小鴨、酪梨、狐狸),記得換成你自己的作品喔!🎨
