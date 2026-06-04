@@ -2,24 +2,92 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ModelViewer from '../components/three/ModelViewer.tsx';
 import { modelUrl } from '../lib/model';
+import { getCollection } from 'astro:content';
+import { withBase } from '../lib/withBase';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 4);
+
+const featured = [
+  { src: modelUrl('avocado.glb'), env: 'sunset', title: '酪梨 Avocado' },
+  { src: modelUrl('toycar.glb'), env: 'park', title: '玩具車 Toy Car' },
+] as const;
 ---
 
 <BaseLayout title="首頁">
-  <section class="text-center">
-    <p class="font-display text-bubblegum-deep text-lg tracking-widest">✦ ✿ welcome ✿ ✦</p>
-    <h1 class="sticker title-pop text-6xl mt-2">我的可愛 3D 工作室</h1>
-    <p class="mt-5 text-lg text-ink/80 font-bold">
-      轉一轉模型、看看作品、讀讀部落格,跟我打聲招呼吧!✨
-    </p>
+  <!-- ===== HERO (framed) ===== -->
+  <section class="card-pop p-6 md:p-9">
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="text-center md:text-left">
+        <p class="font-display text-bubblegum-deep tracking-widest">✦ ✿ welcome ✿ ✦</p>
+        <h1 class="title-pop-pink text-5xl mt-2">嗨,我是 ch4art!</h1>
+        <p class="mt-5 text-ink/85 font-bold leading-relaxed">
+          一個超愛把腦袋裡的小東西捏成 <span class="text-bubblegum-deep">3D 模型</span> 的創作者 🐤<br />
+          這個小天地會放我的 3D 作品、插畫,還有做東西時的碎碎念。
+        </p>
+        <p class="mt-3 text-ink/70 text-sm">
+          右邊的模型可以<strong>拖曳旋轉</strong>、<strong>滾輪縮放</strong>,玩玩看吧!✨
+        </p>
+        <div class="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
+          <a href={withBase('portfolio')} class="btn-pop anim-wiggle bg-skyberry text-ink px-5 py-2.5">看作品 🎨</a>
+          <a href={withBase('blog')} class="btn-pop anim-wiggle bg-butter text-ink px-5 py-2.5">讀部落格 ✏️</a>
+        </div>
+      </div>
 
-    <div class="card-pop mt-10 max-w-2xl mx-auto p-3" style="height: 480px;">
-      <ModelViewer
-        client:only="react"
-        src={modelUrl('duck.glb')}
-        environment="sunset"
-        height="100%"
-      />
+      <div class="rounded-blob overflow-hidden border-[3px] border-outline" style="height: 360px;">
+        <ModelViewer client:only="react" src={modelUrl('duck.glb')} environment="sunset" height="100%" />
+      </div>
     </div>
-    <p class="mt-5 text-sm text-ink/60 font-bold">🖱️ 拖曳旋轉 · 滾輪縮放 · 右鍵 / 兩指平移</p>
+  </section>
+
+  <!-- ===== 精選作品 ===== -->
+  <section class="mt-14">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <h2 class="sticker title-pop text-4xl">精選作品</h2>
+      <a href={withBase('portfolio')} class="btn-pop bg-mint text-ink text-sm px-4 py-2 whitespace-nowrap">看全部 →</a>
+    </div>
+    <div class="grid gap-6 sm:grid-cols-2">
+      {
+        featured.map((m) => (
+          <figure class="card-pop p-3">
+            <div style="height: 280px;">
+              <ModelViewer client:only="react" src={m.src} environment={m.env} height="100%" />
+            </div>
+            <figcaption class="font-display text-center mt-3 text-lg text-ink">{m.title}</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ===== 最新文章 ===== -->
+  <section class="mt-14">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <h2 class="sticker title-pop text-4xl">最新文章</h2>
+      <a href={withBase('blog')} class="btn-pop bg-lavender text-ink text-sm px-4 py-2 whitespace-nowrap">看全部 →</a>
+    </div>
+    {
+      posts.length === 0 ? (
+        <div class="card-pop p-6 text-center font-bold text-ink/70">還沒有文章 ✨</div>
+      ) : (
+        <ul class="grid gap-6 sm:grid-cols-2">
+          {posts.map((post) => (
+            <li class="card-pop anim-wiggle p-5 transition-transform hover:-translate-y-1">
+              <a
+                href={withBase(`blog/${post.id}`)}
+                class="font-display text-xl text-ink hover:text-bubblegum-deep"
+              >
+                {post.data.title}
+              </a>
+              <p class="text-sm text-ink/60 font-bold mt-1">
+                {post.data.pubDate.toLocaleDateString('zh-TW')}
+              </p>
+              <p class="mt-2 text-sm">{post.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </section>
 </BaseLayout>

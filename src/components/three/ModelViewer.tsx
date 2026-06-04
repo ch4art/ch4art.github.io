@@ -1,24 +1,18 @@
-// THE reusable 3D viewer. One component = Canvas + studio lighting + Suspense
-// + auto-framing + pan/zoom/rotate + self-hosted Draco + an in-view gate so
-// off-screen canvases never create a WebGL context (browsers cap ~8-16).
+// THE reusable 3D viewer: model CENTERED, viewed HEAD-ON, scaled up to ~fill
+// the frame. Uses drei <Center> + <Resize> (normalize any model to ~1 unit and
+// center it) + a fixed front-facing camera. No hand-rolled math, no 3/4 angle.
 //
 // Deps: react@19, @react-three/fiber@9, @react-three/drei@10, three@0.184
-// ALWAYS hydrate this at the Astro/MDX call site with client:only="react":
-//   <ModelViewer client:only="react" src={modelUrl('cat.glb')} />
-// client:load / client:visible would server-render first and crash on
-// three.js' browser-API access (`document is not defined`). client:only skips
-// SSR, which is correct for a WebGL canvas.
+// ALWAYS hydrate at the call site with client:only="react".
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage, useGLTF, Html } from '@react-three/drei';
-import { Box3, Vector3 } from 'three';
+import { OrbitControls, Center, Resize, Environment, useGLTF, Html } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { dracoPath } from '../../lib/model';
 
 const DRACO = dracoPath(); // self-hosted decoder dir, e.g. /draco-gltf/
 
-// Matches drei's Stage environment presets (PresetsType).
-type StagePreset =
+type EnvPreset =
   | 'apartment'
   | 'city'
   | 'dawn'
@@ -33,39 +27,17 @@ type StagePreset =
 type ModelViewerProps = {
   /** Already base-prefixed model URL, e.g. modelUrl('cat.glb'). */
   src: string;
-  environment?: StagePreset;
+  environment?: EnvPreset;
   background?: string;
   height?: number | string;
 };
 
 function Model({ src }: { src: string }) {
-  // 2nd arg = path to the self-hosted Draco decoder (string enables Draco).
   const { scene } = useGLTF(src, DRACO);
-
-  // Clone so the same cached model can render in multiple canvases safely.
-  // SkeletonUtils.clone properly rebinds skeletons — a plain scene.clone()
-  // breaks SkinnedMesh (bones aren't rebound → the model renders invisible).
-  const object = useMemo(() => {
-    const o = skeletonClone(scene);
-    o.updateMatrixWorld(true);
-    return o;
-  }, [scene]);
-
-  // Normalize: scale to ~2 units max dimension and center at the origin, so
-  // ANY model frames consistently — tiny (a 5 cm avocado), huge, or rigged.
-  // `precise` (2nd arg true) applies bone transforms, giving a correct box for
-  // skinned/animated meshes; a non-precise box mis-centers them off-screen.
-  const [scale, position] = useMemo(() => {
-    const box = new Box3().setFromObject(object, true);
-    const size = box.getSize(new Vector3());
-    const center = box.getCenter(new Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z) || 1;
-    const s = 2 / maxDim;
-    const pos: [number, number, number] = [-center.x * s, -center.y * s, -center.z * s];
-    return [s, pos] as const;
-  }, [object]);
-
-  return <primitive object={object} scale={scale} position={position} />;
+  // SkeletonUtils.clone keeps skinned meshes intact when a cached model is reused
+  // (a plain scene.clone() renders rigged models invisible).
+  const object = useMemo(() => skeletonClone(scene), [scene]);
+  return <primitive object={object} />;
 }
 
 function Loader() {
@@ -94,7 +66,6 @@ export default function ModelViewer({
   // In-view gate: only mount the WebGL canvas once scrolled near the viewport.
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -125,20 +96,23 @@ export default function ModelViewer({
     >
       {inView ? (
         <Canvas
-          shadows
           frameloop="demand" // idle canvases cost ~0 GPU; controls auto-invalidate
           dpr={[1, 2]}
-          // Pleasing 3/4 elevated "product shot" angle. Stage fits the model
-          // ALONG this direction, so any model fills the frame from a nice angle
-          // (instead of a flat head-on view that shows a quadruped's legs).
-          camera={{ fov: 40, position: [3.5, 2.2, 5.5] }}
+          // Fixed straight-on camera. Resize makes every model ~1 unit, so this
+          // distance frames any model the same way: centered + nearly full.
+          camera={{ position: [0, 0, 1.9], fov: 35 }}
           gl={{ antialias: true }}
         >
+          <ambientLight intensity={0.55} />
+          <directionalLight position={[4, 6, 5]} intensity={1.3} />
           <Suspense fallback={<Loader />}>
-            {/* adjustCamera < 1 fills the frame a bit tighter. */}
-            <Stage adjustCamera={0.9} intensity={0.6} shadows="contact" environment={environment}>
-              <Model src={src} />
-            </Stage>
+            <Environment preset={environment} />
+            {/* Normalize to ~1 unit (Resize) and center it (Center). */}
+            <Center precise>
+              <Resize precise>
+                <Model src={src} />
+              </Resize>
+            </Center>
           </Suspense>
           <OrbitControls
             makeDefault
@@ -147,8 +121,8 @@ export default function ModelViewer({
             enableRotate
             enableDamping
             dampingFactor={0.08}
-            minDistance={2}
-            maxDistance={20}
+            minDistance={0.8}
+            maxDistance={6}
           />
         </Canvas>
       ) : (
@@ -168,8 +142,3 @@ export default function ModelViewer({
     </div>
   );
 }
-
-// Warm the cache for ABOVE-THE-FOLD hero models only (call at module scope in a
-// page that imports this), e.g.:
-//   import { modelUrl } from '../lib/model';
-//   useGLTF.preload(modelUrl('cat.glb'), dracoPath());
