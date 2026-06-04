@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A cute, colorful **art & 3D-modeling portfolio + blog** — a static **Astro 6** site deployed to **GitHub Pages** as a **user site** (`https://npc940103.github.io/`). It shows many interactive (pan / zoom / rotate) **React Three Fiber** 3D models and supports Markdown / MDX blogging. Visual direction: **Sanrio-cute × Memphis × cartoon**.
+A cute, colorful **art & 3D-modeling portfolio + blog** — a static **Astro 6** site deployed to **GitHub Pages** as a **user site** (`https://ch4art.github.io/`). It shows many interactive (pan / zoom / rotate) **React Three Fiber** 3D models and supports Markdown / MDX blogging. Visual direction: **Sanrio-cute × Memphis × cartoon**.
 
 ## Commands
 
@@ -31,7 +31,7 @@ A cute, colorful **art & 3D-modeling portfolio + blog** — a static **Astro 6**
 
 ## Deploy
 
-GitHub repo **must be named `npc940103.github.io`** (user page). Push to `main` → `.github/workflows/deploy.yml` (`withastro/action@v6` + `actions/deploy-pages@v5`) builds & deploys. One-time: GitHub **Settings → Pages → Source = "GitHub Actions"**.
+GitHub repo **must be named `ch4art.github.io`** (user page). Push to `main` → `.github/workflows/deploy.yml` (`withastro/action@v6` + `actions/deploy-pages@v5`) builds & deploys. One-time: GitHub **Settings → Pages → Source = "GitHub Actions"**.
 
 ## Version lockstep
 

@@ -7,8 +7,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://npc940103.github.io', // USER page → served at root
-  // No `base`: a user page (npc940103.github.io) is served from '/'.
+  site: 'https://ch4art.github.io', // USER page → served at root
+  // No `base`: a user page (ch4art.github.io) is served from '/'.
   // import.meta.env.BASE_URL is therefore '/'.
   // (If you ever switch to a project page, add base: '/art'.)
   integrations: [react(), mdx()],
