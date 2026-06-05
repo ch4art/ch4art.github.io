@@ -2,6 +2,8 @@
 // Decorative Memphis / Sanrio scatter layer. Purely visual, non-interactive.
 // Shapes use currentColor; the outer span sets color + rotation, an inner span
 // does the float animation (so rotate and translateY don't clash).
+// Gumroad-style mouse parallax: each shape lazily chases the cursor (lerp in a
+// rAF loop) and drifts on scroll — bigger shapes feel "closer" and move more.
 type Shape = {
   type: 'squiggle' | 'zigzag' | 'star' | 'ring' | 'dot' | 'triangle' | 'cross' | 'half' | 'dots3';
   top: string;
@@ -36,6 +38,8 @@ const shapes: Shape[] = [
     shapes.map((s) => (
       <span
         class="decor-item"
+        data-px={(s.w / 900).toFixed(3)}
+        data-sy={(-s.w / 2400).toFixed(3)}
         style={`top:${s.top};left:${s.left};width:${s.w}px;height:${s.h ?? s.w}px;color:${s.color};--rot:${s.rot ?? 0}deg;`}
       >
         <span class="decor-float" style={`animation-delay:${s.delay ?? '0s'};`}>
@@ -103,8 +107,9 @@ const shapes: Shape[] = [
   .decor-item {
     position: absolute;
     display: block;
-    transform: rotate(var(--rot, 0deg));
+    transform: translate3d(var(--px, 0px), var(--py, 0px), 0) rotate(var(--rot, 0deg));
     opacity: 0.92;
+    will-change: transform;
   }
   .decor-float {
     display: block;
@@ -122,3 +127,71 @@ const shapes: Shape[] = [
     }
   }
 </style>
+
+<script>
+  // Gumroad-style parallax: shapes lazily chase the cursor (lerp ≈ rubber band)
+  // and drift upward on scroll. Runs once per session (module script); after a
+  // ClientRouter swap, astro:page-load re-collects the fresh DOM nodes.
+  type Item = {
+    el: HTMLElement;
+    fx: number; // mouse intensity
+    sy: number; // scroll intensity
+    cx: number;
+    cy: number;
+    tx: number;
+    ty: number;
+    so: number; // scroll offset
+  };
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const coarse = window.matchMedia('(pointer: coarse)');
+  let items: Item[] = [];
+
+  function collect(): void {
+    items = [...document.querySelectorAll<HTMLElement>('.decor-item')].map((el) => ({
+      el,
+      fx: parseFloat(el.dataset.px || '0.04'),
+      sy: parseFloat(el.dataset.sy || '-0.03'),
+      cx: 0,
+      cy: 0,
+      tx: 0,
+      ty: 0,
+      so: 0,
+    }));
+    onScroll();
+  }
+
+  function onMove(e: MouseEvent): void {
+    const dx = e.clientX - window.innerWidth / 2;
+    const dy = e.clientY - window.innerHeight / 2;
+    for (const it of items) {
+      it.tx = dx * it.fx;
+      it.ty = dy * it.fx;
+    }
+  }
+
+  function onScroll(): void {
+    const y = window.scrollY;
+    for (const it of items) it.so = y * it.sy;
+  }
+
+  const lerp = (a: number, b: number, f: number): number => a + (b - a) * f;
+
+  function tick(): void {
+    for (const it of items) {
+      it.cx = lerp(it.cx, it.tx, 0.08);
+      it.cy = lerp(it.cy, it.ty, 0.08);
+      it.el.style.setProperty('--px', `${it.cx.toFixed(2)}px`);
+      it.el.style.setProperty('--py', `${(it.cy + it.so).toFixed(2)}px`);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if (!reduced.matches && !coarse.matches) {
+    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('astro:page-load', collect);
+    collect();
+    requestAnimationFrame(tick);
+  }
+</script>
