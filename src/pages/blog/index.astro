@@ -31,8 +31,13 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
             {post.data.tags.length > 0 && (
               <ul class="flex flex-wrap gap-2 mt-4">
                 {post.data.tags.map((t) => (
-                  <li class="text-xs font-bold px-3 py-1 rounded-pill bg-lavender text-ink border-2 border-outline">
-                    #{t}
+                  <li>
+                    <a
+                      href={withBase(`blog/tag/${t}`)}
+                      class="inline-block text-xs font-bold px-3 py-1 rounded-pill bg-lavender text-ink border-2 border-outline hover:bg-bubblegum hover:text-white transition-colors"
+                    >
+                      #{t}
+                    </a>
                   </li>
                 ))}
               </ul>

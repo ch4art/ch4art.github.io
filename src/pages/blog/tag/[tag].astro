@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { withBase } from '../../../lib/withBase';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag} 的文章`}>
+  <a href={withBase('blog')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回部落格</a>
+  <h1 class="sticker title-pop text-5xl mt-5 mb-7">#{tag}</h1>
+
+  <ul class="grid gap-6 sm:grid-cols-2">
+    {
+      posts.map((post) => (
+        <li class="card-pop anim-wiggle p-5 transition-transform hover:-translate-y-1">
+          <a
+            href={withBase(`blog/${post.id}`)}
+            class="font-display text-xl text-ink hover:text-bubblegum-deep"
+          >
+            {post.data.title}
+          </a>
+          <p class="text-sm text-ink/60 font-bold mt-1">
+            {post.data.pubDate.toLocaleDateString('zh-TW')}
+          </p>
+          <p class="mt-2 text-sm">{post.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
