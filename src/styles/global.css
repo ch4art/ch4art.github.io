@@ -220,3 +220,44 @@ body {
   color: var(--color-ink);
   opacity: 0.9;
 }
+
+/* ===================================================================
+   Contact form (合作邀約)
+   =================================================================== */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.contact-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.contact-form input,
+.contact-form textarea {
+  font: inherit;
+  font-weight: 500;
+  color: var(--color-ink);
+  background: #fff;
+  border: 3px solid var(--color-outline);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--color-bubblegum-deep);
+}
+.contact-form textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+.form-status {
+  font-weight: 700;
+  color: var(--color-bubblegum-deep);
+  min-height: 1.2em;
+  margin: 0;
+}

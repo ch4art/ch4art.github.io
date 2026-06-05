@@ -16,6 +16,8 @@
   "dependencies": {
     "@astrojs/mdx": "^6.0.2",
     "@astrojs/react": "^5.0.7",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/baloo-2": "^5.2.7",
     "@fontsource-variable/fredoka": "^5.2.10",
     "@fontsource-variable/nunito": "^5.2.7",
