@@ -59,5 +59,37 @@ const ogImage = new URL('og.png', Astro.site);
     <main class="relative z-10 mx-auto max-w-5xl px-4 py-8">
       <slot />
     </main>
+
+    <script>
+      // 點擊回饋:在點擊處迸出小星星(尊重減少動態偏好;document 層級,
+      // 跨 ClientRouter 換頁仍有效,只綁一次)
+      function bindSparkles() {
+        const w = window as unknown as Record<string, unknown>;
+        if (w.__sparkBound) return;
+        w.__sparkBound = true;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const COLORS = ['#FF9FCB', '#F2569E', '#9AD3FF', '#FFE27A', '#9B6DFF', '#5FE0DA'];
+        const GLYPHS = ['✦', '✧', '●', '★'];
+
+        document.addEventListener('pointerdown', (e) => {
+          for (let i = 0; i < 6; i++) {
+            const s = document.createElement('span');
+            s.className = 'spark';
+            s.textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+            s.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            s.style.left = `${e.clientX}px`;
+            s.style.top = `${e.clientY}px`;
+            const ang = Math.random() * Math.PI * 2;
+            const dist = 24 + Math.random() * 30;
+            s.style.setProperty('--dx', `${Math.cos(ang) * dist}px`);
+            s.style.setProperty('--dy', `${Math.sin(ang) * dist}px`);
+            s.addEventListener('animationend', () => s.remove());
+            document.body.appendChild(s);
+          }
+        });
+      }
+      bindSparkles();
+    </script>
   </body>
 </html>
