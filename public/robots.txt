@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ch4art.github.io/sitemap-index.xml
