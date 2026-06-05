@@ -306,3 +306,74 @@ input[type='file'] {
     opacity: 0;
   }
 }
+
+/* ---------- 私密文章鎖頭卡片 ---------- */
+.lockbox {
+  text-align: center;
+  background: #fff;
+  border: 3px solid var(--color-outline);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 0 var(--color-outline);
+  padding: 36px 24px;
+  max-width: 420px;
+  margin: 1.5rem auto;
+}
+
+.lock-emoji {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.lockbox form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.lockbox input {
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-ink);
+  background: #fff;
+  border: 3px solid var(--color-outline);
+  border-radius: 9999px;
+  padding: 8px 18px;
+  width: 200px;
+}
+
+.lockbox input:focus {
+  outline: none;
+  border-color: var(--color-bubblegum-deep);
+}
+
+.lock-err {
+  color: #d6336c;
+  font-weight: 800;
+  margin-top: 12px;
+}
+
+.lock-shake {
+  animation: lock-shake 0.4s ease-in-out;
+}
+
+@keyframes lock-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-9px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+}
+
+/* 3D 模型載入中的小提示 */
+.model-loader {
+  font-weight: 800;
+  color: var(--color-ink);
+  background: #fff;
+  border: 3px solid var(--color-outline);
+  border-radius: 9999px;
+  padding: 8px 18px;
+  box-shadow: 4px 4px 0 0 var(--color-outline);
+  white-space: nowrap;
+}

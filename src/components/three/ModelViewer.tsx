@@ -6,7 +6,15 @@
 // ALWAYS hydrate at the call site with client:only="react".
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Center, Resize, Environment, useGLTF, Html } from '@react-three/drei';
+import {
+  OrbitControls,
+  Center,
+  Resize,
+  Environment,
+  useGLTF,
+  Html,
+  useProgress,
+} from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { dracoPath } from '../../lib/model';
 
@@ -41,18 +49,11 @@ function Model({ src }: { src: string }) {
 }
 
 function Loader() {
+  // Real download progress for the cute "carrying the model" pill.
+  const { progress } = useProgress();
   return (
     <Html center>
-      <span
-        style={{
-          color: '#F76FAE',
-          fontFamily: 'system-ui, sans-serif',
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        Loading 3D…
-      </span>
+      <span className="model-loader">🐣 努力搬運中… {Math.round(progress)}%</span>
     </Html>
   );
 }

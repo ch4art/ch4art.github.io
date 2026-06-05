@@ -17,6 +17,9 @@ const blog = defineCollection({
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
       draft: z.boolean().default(false),
+      // 私密文章:內文以 AES-GCM 加密放在 cipher(密語不存在任何地方)。
+      private: z.boolean().default(false),
+      cipher: z.string().optional(),
     }),
 });
 

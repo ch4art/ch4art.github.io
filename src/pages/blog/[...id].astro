@@ -55,9 +55,152 @@ const { Content } = await render(post);
       )
     }
 
-    <div class="post-body mt-5">
-      <Content />
-    </div>
+    {
+      post.data.private && post.data.cipher ? (
+        <div class="post-body mt-5" id="private-root" data-cipher={post.data.cipher}>
+          <div class="lockbox" id="lockbox">
+            <div class="lock-emoji">🔒</div>
+            <p class="font-bold">這是一篇私密文章,輸入通關密語才能看喔</p>
+            <form id="lock-form" autocomplete="off">
+              <input
+                id="lock-pw"
+                type="password"
+                placeholder="通關密語…"
+                autocomplete="off"
+                required
+              />
+              <button id="lock-btn" class="btn-pop bg-bubblegum text-white px-5 py-2" type="submit">
+                解鎖 ✨
+              </button>
+            </form>
+            <p class="lock-err" id="lock-err" hidden>
+              密語不對喔,再試一次 🥺
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div class="post-body mt-5">
+          <Content />
+        </div>
+      )
+    }
+
+    <script>
+      // 私密文章解鎖:密語 → PBKDF2 → AES-GCM 解密,全部在瀏覽器裡完成。
+      // 網站(和 GitHub)上只有密文;密語不會被傳送或儲存到任何伺服器。
+      const b64d = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+      // 密語正規化:NFC + 去頭尾空白,跟編輯器端一致(避免中文/emoji 或多打
+      // 一個空白就永遠解不開)。
+      const normPw = (s: string): string => s.normalize('NFC').trim();
+
+      // 解出來的金鑰只放在記憶體裡(撐過 ClientRouter 換頁,整頁重整就消失)。
+      // 比把密語塞進 sessionStorage 安全:磁碟/其他腳本都讀不到密語。
+      const keyCache = new Map<string, CryptoKey>();
+
+      class WrongPassword extends Error {}
+
+      async function deriveKey(pw: string, salt: Uint8Array, iter: number): Promise<CryptoKey> {
+        const material = await crypto.subtle.importKey(
+          'raw',
+          new TextEncoder().encode(normPw(pw)),
+          'PBKDF2',
+          false,
+          ['deriveKey'],
+        );
+        return crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: salt as BufferSource, iterations: iter, hash: 'SHA-256' },
+          material,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['decrypt'],
+        );
+      }
+
+      async function render(root: HTMLElement, key: CryptoKey): Promise<void> {
+        const env = JSON.parse(atob(root.dataset.cipher || ''));
+        let pt: ArrayBuffer;
+        try {
+          pt = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: b64d(env.iv) as BufferSource },
+            key,
+            b64d(env.ct) as BufferSource,
+          );
+        } catch {
+          throw new WrongPassword(); // GCM 認證失敗 = 密語不對
+        }
+        const payload = JSON.parse(new TextDecoder().decode(pt));
+        const { marked } = await import('marked');
+        let html = marked.parse(payload.md || '') as string;
+        for (const im of payload.images || []) {
+          // 圖片下載失敗(網路問題)不該被當成密語錯誤;解密失敗才略過該張。
+          const res = await fetch(`${import.meta.env.BASE_URL}${im.file}`);
+          const ct = new Uint8Array(await res.arrayBuffer());
+          try {
+            const bytes = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv: b64d(im.iv) as BufferSource },
+              key,
+              ct as BufferSource,
+            );
+            const url = URL.createObjectURL(new Blob([bytes], { type: im.type || 'image/png' }));
+            html = html.split(`./images/${im.name}`).join(url);
+          } catch {
+            /* 單張圖片解不開不擋整篇 */
+          }
+        }
+        keyCache.set(location.pathname, key);
+        root.innerHTML = html;
+      }
+
+      async function unlock(root: HTMLElement, pw: string): Promise<void> {
+        const env = JSON.parse(atob(root.dataset.cipher || ''));
+        const key = await deriveKey(pw, b64d(env.salt), env.iter || 310000);
+        await render(root, key);
+      }
+
+      function setup(): void {
+        const root = document.getElementById('private-root');
+        if (!root || root.dataset.bound) return;
+        root.dataset.bound = '1';
+        const form = root.querySelector('#lock-form') as HTMLFormElement;
+        const input = root.querySelector('#lock-pw') as HTMLInputElement;
+        const btn = root.querySelector('#lock-btn') as HTMLButtonElement;
+        const err = root.querySelector('#lock-err') as HTMLElement;
+        const box = root.querySelector('#lockbox') as HTMLElement;
+
+        const fail = (msg: string): void => {
+          err.textContent = msg;
+          err.hidden = false;
+          box.classList.remove('lock-shake');
+          void box.offsetWidth; // 重新觸發動畫
+          box.classList.add('lock-shake');
+        };
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (btn.disabled) return;
+          err.hidden = true;
+          btn.disabled = true;
+          btn.textContent = '解鎖中…';
+          try {
+            await unlock(root, input.value);
+          } catch (ex) {
+            if (ex instanceof WrongPassword) fail('密語不對喔,再試一次 🥺');
+            else fail('解鎖時網路怪怪的,請再按一次 🌧️');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = '解鎖 ✨';
+          }
+        });
+
+        // 同一個 SPA session 內解過就直接還原(金鑰在記憶體裡)
+        const cached = keyCache.get(location.pathname);
+        if (cached) render(root, cached).catch(() => keyCache.delete(location.pathname));
+      }
+
+      setup();
+      document.addEventListener('astro:page-load', setup);
+    </script>
 
     {
       (newer || older) && (

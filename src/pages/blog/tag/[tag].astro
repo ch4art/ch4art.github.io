@@ -32,6 +32,7 @@ const { tag, posts } = Astro.props;
             href={withBase(`blog/${post.id}`)}
             class="font-display text-xl text-ink hover:text-bubblegum-deep"
           >
+            {post.data.private && '🔒 '}
             {post.data.title}
           </a>
           <p class="text-sm text-ink/60 font-bold mt-1">
