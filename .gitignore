@@ -28,3 +28,6 @@ raw-models/
 
 # playwright-mcp scratch output (screenshots, snapshots)
 .playwright-mcp/
+
+# stray verification screenshots in the repo root (public/ images are kept)
+/*.png
