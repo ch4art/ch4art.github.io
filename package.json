@@ -22,6 +22,7 @@
     "@fontsource-variable/fredoka": "^5.2.10",
     "@fontsource-variable/nunito": "^5.2.7",
     "@fontsource-variable/quicksand": "^5.2.10",
+    "@fontsource/huninn": "^5.2.4",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@tailwindcss/vite": "^4.3.0",

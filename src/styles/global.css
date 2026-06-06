@@ -34,8 +34,10 @@
   --shadow-pop:    5px 5px 0 0 var(--color-outline);
   --shadow-pop-sm: 3px 3px 0 0 var(--color-outline);
 
-  /* Fonts */
-  --font-display: "Fredoka Variable", "Baloo 2 Variable", system-ui, sans-serif;
+  /* Fonts. Titles: Latin uses Fredoka; CJK has no glyphs there so it falls
+     through to Huninn (粉圓, rounded + thick — cute and survives the stroke).
+     Body keeps the system CJK font (cleaner for long reading). */
+  --font-display: "Fredoka Variable", "Huninn", "Baloo 2 Variable", system-ui, sans-serif;
   --font-body:    "Nunito Variable", "Quicksand Variable", system-ui, sans-serif;
 }
 
@@ -91,34 +93,29 @@ body {
     box-shadow: 1px 1px 0 0 var(--color-outline);
   }
 
-  /* Sticker-style chunky title: white fill, dark outline, colored drop.
-     The outline is layered text-shadows (8 directions), NOT -webkit-text-stroke:
-     stroke eats the fill of thin glyphs, so Chinese (system fallback font, thin
-     strokes) lost its fill and the drop shadow leaked through. Layered shadows
-     render the same on thick Latin and thin CJK. */
+  /* Sticker-style chunky title. SMOOTH outline via -webkit-text-stroke (a
+     layered-shadow outline looked grainy/notched at title sizes). Layer order
+     is bottom→top: colored drop (text-shadow, behind everything) → dark stroke
+     → fill (paint-order: stroke fill paints the fill ON TOP, so the stroke is a
+     clean outline and the fill stays visible). Chinese uses the rounded Huninn
+     font so its strokes are thick enough to look good. */
   .title-pop {
     font-family: var(--font-display);
     color: #fff;
+    -webkit-text-stroke: 2.5px var(--color-outline);
+    paint-order: stroke fill;
+    text-shadow: 4px 4px 0 var(--color-bubblegum-deep);
     line-height: 1.15;
-    text-shadow:
-      -2px -2px 0 var(--color-outline), 2px -2px 0 var(--color-outline),
-      -2px 2px 0 var(--color-outline), 2px 2px 0 var(--color-outline),
-      -2px 0 0 var(--color-outline), 2px 0 0 var(--color-outline),
-      0 -2px 0 var(--color-outline), 0 2px 0 var(--color-outline),
-      5px 6px 0 var(--color-bubblegum-deep);
   }
 
   /* Pink-fill sticker title — for use ON white cards (white fill would vanish). */
   .title-pop-pink {
     font-family: var(--font-display);
     color: var(--color-bubblegum-deep);
+    -webkit-text-stroke: 2px var(--color-outline);
+    paint-order: stroke fill;
+    text-shadow: 3px 3px 0 var(--color-butter);
     line-height: 1.15;
-    text-shadow:
-      -2px -2px 0 var(--color-outline), 2px -2px 0 var(--color-outline),
-      -2px 2px 0 var(--color-outline), 2px 2px 0 var(--color-outline),
-      -2px 0 0 var(--color-outline), 2px 0 0 var(--color-outline),
-      0 -2px 0 var(--color-outline), 0 2px 0 var(--color-outline),
-      4px 5px 0 var(--color-butter);
   }
 
   /* Slight playful tilt, like a peeled sticker. */
