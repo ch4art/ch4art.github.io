@@ -34,11 +34,11 @@
   --shadow-pop:    5px 5px 0 0 var(--color-outline);
   --shadow-pop-sm: 3px 3px 0 0 var(--color-outline);
 
-  /* Fonts. Titles: Latin uses Fredoka; CJK has no glyphs there so it falls
-     through to Huninn (粉圓, rounded + thick — cute and survives the stroke).
-     Body keeps the system CJK font (cleaner for long reading). */
+  /* Fonts — everything rounded & cute. Latin uses Fredoka/Nunito (rounded);
+     CJK has no glyphs there so it falls through to Huninn (粉圓, rounded) for
+     BOTH titles and body, so all Chinese is round, not the formal system font. */
   --font-display: "Fredoka Variable", "Huninn", "Baloo 2 Variable", system-ui, sans-serif;
-  --font-body:    "Nunito Variable", "Quicksand Variable", system-ui, sans-serif;
+  --font-body:    "Nunito Variable", "Huninn", "Quicksand Variable", system-ui, sans-serif;
 }
 
 /* ===================================================================
