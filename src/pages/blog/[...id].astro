@@ -25,7 +25,7 @@ const { Content } = await render(post);
 <BaseLayout title={post.data.title} description={post.data.description}>
   <article class="mx-auto max-w-3xl">
     <a href={withBase('blog')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回部落格</a>
-    <h1 class="sticker title-pop text-4xl mt-5">{post.data.title}</h1>
+    <h1 class="sticker title-pop text-4xl mt-5" data-text={post.data.title}>{post.data.title}</h1>
     <p class="text-ink/60 font-bold mt-2">{post.data.pubDate.toLocaleDateString('zh-TW')}</p>
 
     {

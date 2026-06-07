@@ -9,7 +9,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
 ---
 
 <BaseLayout title="部落格">
-  <h1 class="sticker title-pop text-5xl mb-7">部落格 ✏️</h1>
+  <h1 class="sticker title-pop text-5xl mb-7" data-text="部落格">部落格 ✏️</h1>
 
   {
     posts.length === 0 ? (

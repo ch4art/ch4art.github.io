@@ -17,7 +17,7 @@ const { Content } = await render(work);
 <BaseLayout title={work.data.title} description={work.data.description}>
   <a href={withBase('portfolio')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回作品集</a>
 
-  <h1 class="sticker title-pop text-4xl mt-5">{work.data.title}</h1>
+  <h1 class="sticker title-pop text-4xl mt-5" data-text={work.data.title}>{work.data.title}</h1>
   <p class="text-ink/80 font-bold mt-2">{work.data.description}</p>
 
   {

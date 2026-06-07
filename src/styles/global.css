@@ -93,27 +93,32 @@ body {
     box-shadow: 1px 1px 0 0 var(--color-outline);
   }
 
-  /* Sticker title — a clear TWO-LAYER look the user asked for:
-     黑框白字 on TOP, a SOLID 粉紅 layer UNDERNEATH.
-     The pink layer is a stacked text-shadow extrude (many 1px steps) so it reads
-     as one solid pink offset block — a single shadow gets mostly hidden behind
-     the dark stroke and only shows a thin pink sliver. Smooth outline via
-     -webkit-text-stroke; CJK uses the rounded Huninn font. */
+  /* Sticker title — a real TWO-LAYER stack (not stacked shadows):
+     TOP layer = 黑框白字 (the element's own text), BOTTOM layer = a single
+     黑框粉紅 duplicate via ::before content:attr(data-text), offset once.
+     So every .title-pop MUST carry a data-text attribute (emoji left out of it
+     to avoid a ghost emoji on the pink layer). Offset is in em so it scales
+     with the title size. CJK uses the rounded Huninn font. */
   .title-pop {
     font-family: var(--font-display);
+    position: relative;
+    isolation: isolate; /* keep ::before's z-index:-1 behind the text, not the page */
     color: #fff;
     -webkit-text-stroke: 2.5px var(--color-outline);
     paint-order: stroke fill;
-    text-shadow:
-      1px 1px 0 var(--color-bubblegum-deep), 2px 2px 0 var(--color-bubblegum-deep),
-      3px 3px 0 var(--color-bubblegum-deep), 4px 4px 0 var(--color-bubblegum-deep),
-      5px 5px 0 var(--color-bubblegum-deep), 6px 6px 0 var(--color-bubblegum-deep),
-      7px 7px 0 var(--color-bubblegum-deep), 8px 8px 0 var(--color-bubblegum-deep);
     line-height: 1.2;
   }
-
-  /* All titles share ONE look: 黑框白字 on top, 粉紅 drop underneath
-     (.title-pop). .title-pop-pink was retired to keep titles consistent. */
+  .title-pop::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0; /* same box as the text so it aligns, then offset */
+    z-index: -1;
+    transform: translate(0.09em, 0.12em);
+    color: var(--color-bubblegum-deep);
+    -webkit-text-stroke: 2.5px var(--color-outline);
+    paint-order: stroke fill;
+    pointer-events: none;
+  }
 
   /* Slight playful tilt, like a peeled sticker. */
   .sticker {

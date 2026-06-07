@@ -21,7 +21,7 @@ const featuredWorks = (await getCollection('works'))
     <div class="grid md:grid-cols-2 gap-8 items-center">
       <div class="text-center md:text-left">
         <p class="font-display text-bubblegum-deep tracking-widest">✦ ✿ welcome ✿ ✦</p>
-        <h1 class="sticker title-pop text-5xl mt-2">嗨,我是 ch4art!</h1>
+        <h1 class="sticker title-pop text-5xl mt-2" data-text="嗨,我是 ch4art!">嗨,我是 ch4art!</h1>
         <p class="mt-5 text-ink/85 font-bold leading-relaxed">
           一個超愛把腦袋裡的小東西捏成 <span class="text-bubblegum-deep">3D 模型</span> 的創作者 🐤<br />
           這個小天地會放我的 3D 作品、插畫,還有做東西時的碎碎念。
@@ -44,7 +44,7 @@ const featuredWorks = (await getCollection('works'))
   <!-- ===== 精選作品 ===== -->
   <section class="mt-14">
     <div class="flex items-end justify-between gap-4 mb-6">
-      <h2 class="sticker title-pop text-4xl">精選作品</h2>
+      <h2 class="sticker title-pop text-4xl" data-text="精選作品">精選作品</h2>
       <a href={withBase('portfolio')} class="btn-pop bg-mint text-ink text-sm px-4 py-2 whitespace-nowrap">看全部 →</a>
     </div>
     <div class="grid gap-6 sm:grid-cols-2">
@@ -70,7 +70,7 @@ const featuredWorks = (await getCollection('works'))
   <!-- ===== 最新文章 ===== -->
   <section class="mt-14">
     <div class="flex items-end justify-between gap-4 mb-6">
-      <h2 class="sticker title-pop text-4xl">最新文章</h2>
+      <h2 class="sticker title-pop text-4xl" data-text="最新文章">最新文章</h2>
       <a href={withBase('blog')} class="btn-pop bg-lavender text-ink text-sm px-4 py-2 whitespace-nowrap">看全部 →</a>
     </div>
     {

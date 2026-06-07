@@ -7,7 +7,7 @@ const works = (await getCollection('works')).sort((a, b) => a.data.order - b.dat
 ---
 
 <BaseLayout title="作品集">
-  <h1 class="sticker title-pop text-5xl mb-3">作品集 🎨</h1>
+  <h1 class="sticker title-pop text-5xl mb-3" data-text="作品集">作品集 🎨</h1>
   <p class="text-ink/70 font-bold mb-8">點任一個作品,進去就能 360° 轉一轉、放大看細節!</p>
 
   <div class="grid gap-6" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
