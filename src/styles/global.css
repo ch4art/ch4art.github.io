@@ -93,19 +93,23 @@ body {
     box-shadow: 1px 1px 0 0 var(--color-outline);
   }
 
-  /* Sticker-style chunky title. SMOOTH outline via -webkit-text-stroke (a
-     layered-shadow outline looked grainy/notched at title sizes). Layer order
-     is bottom→top: colored drop (text-shadow, behind everything) → dark stroke
-     → fill (paint-order: stroke fill paints the fill ON TOP, so the stroke is a
-     clean outline and the fill stays visible). Chinese uses the rounded Huninn
-     font so its strokes are thick enough to look good. */
+  /* Sticker title — a clear TWO-LAYER look the user asked for:
+     黑框白字 on TOP, a SOLID 粉紅 layer UNDERNEATH.
+     The pink layer is a stacked text-shadow extrude (many 1px steps) so it reads
+     as one solid pink offset block — a single shadow gets mostly hidden behind
+     the dark stroke and only shows a thin pink sliver. Smooth outline via
+     -webkit-text-stroke; CJK uses the rounded Huninn font. */
   .title-pop {
     font-family: var(--font-display);
     color: #fff;
     -webkit-text-stroke: 2.5px var(--color-outline);
     paint-order: stroke fill;
-    text-shadow: 4px 4px 0 var(--color-bubblegum-deep);
-    line-height: 1.15;
+    text-shadow:
+      1px 1px 0 var(--color-bubblegum-deep), 2px 2px 0 var(--color-bubblegum-deep),
+      3px 3px 0 var(--color-bubblegum-deep), 4px 4px 0 var(--color-bubblegum-deep),
+      5px 5px 0 var(--color-bubblegum-deep), 6px 6px 0 var(--color-bubblegum-deep),
+      7px 7px 0 var(--color-bubblegum-deep), 8px 8px 0 var(--color-bubblegum-deep);
+    line-height: 1.2;
   }
 
   /* All titles share ONE look: 黑框白字 on top, 粉紅 drop underneath
