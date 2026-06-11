@@ -1,6 +1,6 @@
 ---
 title: 小鼠鼠 Mouse
-description: 網站吉祥物本鼠!圓滾滾的寵物鼠,大耳朵粉鼻子 🐭
+description: 網站吉祥物本鼠!薰衣草色的麻糬鼠,軟軟的一顆 🐭
 model: mouse.glb
 thumb: mouse-poster.webp
 environment: studio
@@ -9,9 +9,10 @@ tags: ["可愛", "吉祥物", "老鼠"]
 software: three.js
 turntable: true
 poster: mouse-poster.webp
-accent: "#FFE9F3"
+accent: "#F4EEFF"
 featured: true
 ---
 
-吉祥物的 3D 版!用一顆顆圓球捏出來的寵物鼠:奶油白的毛、
-大大的圓耳朵、粉紅鼻頭和細細的尾巴。拖著牠轉一圈看看 🐭✨
+吉祥物的 3D 版!薰衣草色的麻糬鼠:軟軟的蛋形身體、
+頂上兩顆大粉耳、瞇瞇眼和縫線小鬍鬚,肚子上還有個小 x。
+拖著牠轉一圈看看 🐭✨

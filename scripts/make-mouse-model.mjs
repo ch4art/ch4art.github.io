@@ -1,5 +1,7 @@
-// 程序化生成網站吉祥物的 3D 版:一隻圓滾滾的寵物鼠(fancy mouse)。
-// 純 three.js 幾何(球/管/圓柱),無貼圖 → GLTFExporter 可在 Node 直接輸出。
+// 程序化生成網站吉祥物的 3D 版:薰衣草色「麻糬鼠」。
+// 依角色表:淡紫蛋形軟身體(無頭身分離)、頂上大粉圓耳、閉眼快樂線條眼、
+// 黑色縫線式鬍鬚、粉腮紅、小粉手腳、粉胖尾巴、肚子上有個小 x。
+// 純 three.js 幾何,無貼圖 → GLTFExporter 可在 Node 直接輸出。
 // 用法:node scripts/make-mouse-model.mjs  →  raw-models/mouse.glb
 //       之後跑 npm run optimize 產出 public/models/mouse.glb
 import * as THREE from 'three';
@@ -22,83 +24,118 @@ globalThis.FileReader ??= class {
   }
 };
 
-/* ---------- 品牌配色(對齊 global.css tokens) ---------- */
-const FUR = new THREE.MeshStandardMaterial({ color: 0xfff8f2, roughness: 0.68, metalness: 0 }); // 奶油白毛
-const PINK = new THREE.MeshStandardMaterial({ color: 0xffb7ce, roughness: 0.6, metalness: 0 }); // 內耳/尾/腳
-const NOSE = new THREE.MeshStandardMaterial({ color: 0xf2569e, roughness: 0.45, metalness: 0 }); // 鼻子
-const EYE = new THREE.MeshStandardMaterial({ color: 0x3a2e45, roughness: 0.25, metalness: 0 }); // 眼睛(品牌 outline 色)
-const SHINE = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0 }); // 眼神光
-const BLUSH = new THREE.MeshStandardMaterial({ color: 0xff9fcb, roughness: 0.7, metalness: 0 }); // 腮紅
+/* ---------- 角色表配色 ---------- */
+const BODY = new THREE.MeshStandardMaterial({ color: 0xcec1e6, roughness: 0.75, metalness: 0 }); // 薰衣草紫
+const PINK = new THREE.MeshStandardMaterial({ color: 0xf5b9ce, roughness: 0.7, metalness: 0 }); // 耳/手腳/尾
+const PINK_DEEP = new THREE.MeshStandardMaterial({ color: 0xee9cb9, roughness: 0.7, metalness: 0 }); // 內耳
+const BLUSH = new THREE.MeshStandardMaterial({ color: 0xf49ec0, roughness: 0.8, metalness: 0 }); // 腮紅
+const MARK = new THREE.MeshStandardMaterial({ color: 0x2f2937, roughness: 0.5, metalness: 0 }); // 線條五官
 
 const root = new THREE.Group();
-root.name = 'pet-mouse';
+root.name = 'mochi-mouse';
 
-const ball = (mat, r, pos, scale = [1, 1, 1], rot = [0, 0, 0], seg = 48) => {
-  const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg, Math.max(16, seg / 2)), mat);
-  m.position.set(...pos);
-  m.scale.set(...scale);
-  m.rotation.set(...rot);
-  root.add(m);
-  return m;
+const add = (mesh, pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1]) => {
+  mesh.position.set(...pos);
+  mesh.rotation.set(...rot);
+  mesh.scale.set(...scale);
+  root.add(mesh);
+  return mesh;
 };
 
-/* ---------- 身體:坐姿西洋梨(下圓上窄,寵物鼠蹲坐感) ---------- */
-ball(FUR, 0.88, [0, 0.74, -0.05], [1, 0.95, 1.06]); // 屁屁
-ball(FUR, 0.66, [0, 1.18, 0.12], [1, 0.95, 0.98]); // 胸口(墊出梨形)
-
-/* ---------- 頭 + 吻部 ---------- */
-ball(FUR, 0.6, [0, 1.72, 0.3], [1, 0.94, 0.96]);
-ball(FUR, 0.32, [0, 1.56, 0.78], [1, 0.78, 0.92]); // 吻部
-ball(NOSE, 0.095, [0, 1.57, 1.05]); // 粉鼻頭
-
-/* ---------- 大圓耳(寵物鼠的招牌)+ 粉色內耳 ---------- */
-for (const s of [-1, 1]) {
-  ball(FUR, 0.34, [s * 0.42, 2.26, 0.14], [1, 1, 0.38], [0.12, s * 0.35, s * -0.12]);
-  ball(PINK, 0.255, [s * 0.43, 2.26, 0.205], [1, 1, 0.32], [0.12, s * 0.35, s * -0.12]);
+/** 蛋形身體在世界座標 (x, y) 的表面 z(五官全部「貼」在這上面) */
+function surfZ(x, y) {
+  const local = y - 0.95;
+  const sin = local > 0 ? Math.min(local / 1.18, 0.999) : Math.max(local / 0.92, -0.999);
+  const cos = Math.sqrt(1 - sin * sin);
+  const squeeze = sin > 0 ? 1 - 0.24 * sin : 1;
+  const r = cos * squeeze;
+  return Math.sqrt(Math.max(r * r - x * x, 0.0001));
 }
 
-/* ---------- 眼睛 + 眼神光 + 腮紅 ---------- */
-for (const s of [-1, 1]) {
-  ball(EYE, 0.088, [s * 0.235, 1.82, 0.78]);
-  ball(SHINE, 0.032, [s * 0.205, 1.85, 0.85]);
-  ball(BLUSH, 0.105, [s * 0.4, 1.6, 0.66], [1, 0.62, 0.4], [0, s * 0.5, 0]);
+const ball = (mat, r, pos, scale = [1, 1, 1], rot = [0, 0, 0], seg = 48) =>
+  add(new THREE.Mesh(new THREE.SphereGeometry(r, seg, Math.max(16, seg / 2)), mat), pos, rot, scale);
+
+/** 圓頭短棒(線條五官用的「筆畫」) */
+const stroke = (len, r, pos, rot) =>
+  add(new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 12), MARK), pos, rot);
+
+/* ---------- 蛋形軟身體(Lathe:下圓潤、上收尖的麻糬曲線) ---------- */
+{
+  const pts = [];
+  const STEPS = 42;
+  for (let i = 0; i <= STEPS; i++) {
+    const phi = -Math.PI / 2 + (i / STEPS) * Math.PI; // -90° → +90°
+    const s = Math.sin(phi);
+    // 上半收窄(蛋形),下半微扁(坐得穩)
+    const squeeze = s > 0 ? 1 - 0.24 * s : 1;
+    const x = Math.cos(phi) * squeeze;
+    const y = s > 0 ? s * 1.18 : s * 0.92;
+    pts.push(new THREE.Vector2(Math.max(0.0001, x), y));
+  }
+  const body = new THREE.Mesh(new THREE.LatheGeometry(pts, 64), BODY);
+  add(body, [0, 0.95, 0]);
 }
 
-/* ---------- 鬍鬚(細圓柱,左右各三根) ---------- */
-const whiskerGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.46, 6);
+/* ---------- 頂上大粉圓耳(+ 深粉內耳) ---------- */
 for (const s of [-1, 1]) {
-  for (const [tilt, y] of [
-    [0.22, 1.62],
-    [0, 1.56],
-    [-0.22, 1.5],
-  ]) {
-    const w = new THREE.Mesh(whiskerGeo, EYE);
-    w.position.set(s * 0.42, y, 0.82);
-    w.rotation.set(0, 0, s * (Math.PI / 2 + tilt * 0.6));
-    w.rotation.y = s * -0.25;
-    root.add(w);
+  ball(PINK, 0.36, [s * 0.5, 1.92, 0.02], [1, 1, 0.42], [0.1, 0, s * -0.28]);
+  ball(PINK_DEEP, 0.26, [s * 0.52, 1.92, 0.1], [1, 1, 0.3], [0.1, 0, s * -0.28]);
+}
+
+/* ---------- 閉眼快樂線條眼(短橫筆畫,外端微微上揚) ---------- */
+for (const s of [-1, 1]) {
+  const ex = s * 0.27;
+  const ey = 1.44;
+  stroke(0.2, 0.04, [ex, ey, surfZ(ex, ey) + 0.015], [0, s * 0.34, Math.PI / 2 + s * 0.14]);
+}
+
+/* ---------- 縫線式鬍鬚(招牌!主斜線 + 兩短橫線,左右各一組) ---------- */
+for (const s of [-1, 1]) {
+  const cx = s * 0.5;
+  const cy = 1.12;
+  const face = s * 0.58; // 跟著曲率往側面轉
+  const tilt = s * 0.6; // 主線斜角
+  // 主線
+  stroke(0.34, 0.03, [cx, cy, surfZ(cx, cy) + 0.015], [0, face, Math.PI / 2 + tilt]);
+  // 兩條短交叉線(沿主線分佈、垂直於主線)
+  for (const d of [-0.1, 0.1]) {
+    const px = cx + Math.cos(tilt) * d * s;
+    const py = cy + Math.sin(tilt) * d;
+    stroke(0.09, 0.026, [px, py, surfZ(px, py) + 0.02], [0, face, tilt]);
   }
 }
 
-/* ---------- 前手手(收在胸前)+ 後腳 ---------- */
+/* ---------- 腮紅(角色表正面沒有獨立的嘴,臉就是眼+縫線+腮紅) ---------- */
 for (const s of [-1, 1]) {
-  ball(PINK, 0.13, [s * 0.24, 1.02, 0.62], [1, 0.9, 1.1]); // 前手
-  ball(PINK, 0.19, [s * 0.5, 0.16, 0.42], [1, 0.5, 1.55]); // 後腳(扁長)
+  const bx = s * 0.52;
+  const by = 1.3;
+  ball(BLUSH, 0.13, [bx, by, surfZ(bx, by) + 0.01], [1, 0.72, 0.28], [0, s * 0.6, 0]);
 }
 
-/* ---------- 粉色細尾巴(往後再側捲) ---------- */
-const tailCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0, 0.5, -0.82),
-  new THREE.Vector3(0, 0.28, -1.25),
-  new THREE.Vector3(0.3, 0.12, -1.55),
-  new THREE.Vector3(0.66, 0.1, -1.42),
-  new THREE.Vector3(0.84, 0.16, -1.05),
-]);
-const tail = new THREE.Mesh(new THREE.TubeGeometry(tailCurve, 48, 0.055, 12, false), PINK);
-root.add(tail);
-const tailTip = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), PINK);
-tailTip.position.copy(tailCurve.getPoint(1));
-root.add(tailTip);
+/* ---------- 肚子上的小 x(角色表的祕密記號) ---------- */
+for (const s of [-1, 1]) {
+  stroke(0.1, 0.024, [0.16, 0.52, surfZ(0.16, 0.52) + 0.012], [0, 0.18, Math.PI / 4 + (s * Math.PI) / 2]);
+}
+
+/* ---------- 小粉手手(身側小肉球)+ 前腳 ---------- */
+for (const s of [-1, 1]) {
+  ball(PINK, 0.12, [s * 0.74, 0.98, 0.3], [1.1, 0.85, 1]); // 側邊小手
+  ball(PINK, 0.14, [s * 0.3, 0.1, 0.6], [1, 0.55, 1.25]); // 前腳
+}
+
+/* ---------- 粉胖尾巴(往後翹的小蘿蔔) ---------- */
+{
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.4, -0.8),
+    new THREE.Vector3(0, 0.26, -1.12),
+    new THREE.Vector3(0.24, 0.2, -1.32),
+    new THREE.Vector3(0.5, 0.3, -1.28),
+  ]);
+  add(new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.085, 12, false), PINK));
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), PINK);
+  tip.position.copy(curve.getPoint(1));
+  root.add(tip);
+}
 
 /* ---------- 輸出 GLB ---------- */
 const scene = new THREE.Scene();
