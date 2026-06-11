@@ -19,14 +19,20 @@ function heroIntro(): void {
   // 標題不動 opacity:它是 LCP 元素,藏起來會把 LCP 推遲到 JS 跑完
   tl.from(title, { scale: 0.6, y: 36, duration: 0.65 })
     .from('[data-hero-sub]', { autoAlpha: 0, y: 22, duration: 0.45, ease: 'power2.out' }, '-=0.25')
-    .from(
+    .fromTo(
       '[data-hero-model]',
-      // 卡通 squash-stretch:從底部壓扁彈起
-      { autoAlpha: 0, scaleY: 0.7, scaleX: 1.08, y: 30, transformOrigin: '50% 100%', duration: 0.6 },
+      // ⚠️ 模型欄是 3D canvas 的祖先 —— 只能位移+淡入,不可 scale/rotate:
+      // R3F 用 getBoundingClientRect 量 canvas 尺寸,若 canvas 在縮放
+      // 進行中掛載會量到壓扁的尺寸且永遠不更正(老鼠偏左上的 bug)。
+      // 用 fromTo 寫死終點:就算有殘留的隱藏值也保證回到可見。
+      { autoAlpha: 0, y: 36 },
+      { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power3.out' },
       '-=0.3',
     )
     .from('[data-hero-badge]', { autoAlpha: 0, scale: 0, rotation: -120, duration: 0.5 }, '-=0.25')
-    .from('[data-hero-bubble]', { autoAlpha: 0, scale: 0, rotation: 8, duration: 0.4, ease: 'back.out(2.2)' }, '-=0.2');
+    .from('[data-hero-bubble]', { autoAlpha: 0, scale: 0, rotation: 8, duration: 0.4, ease: 'back.out(2.2)' }, '-=0.2')
+    // 保險:進場全部結束後叫 R3F 重新量一次(吃掉任何殘存的量測競態)
+    .call(() => window.dispatchEvent(new Event('resize')));
 }
 
 /* ---------- 通用:區塊標題/卡片進場(batch,一次性) ---------- */
@@ -201,5 +207,26 @@ function cleanup(): void {
   ScrollTrigger.getAll().forEach((t) => t.kill());
 }
 
-document.addEventListener('astro:page-load', init);
-document.addEventListener('astro:before-swap', cleanup);
+// ---------- 全域單例守衛 ----------
+// dev 的模組重載(HMR/vite 重新最佳化)會讓本檔跑出第二份實例:
+// 兩份各自 init,第二份的 gsap.from 把第一份留下的「隱藏起點」
+// 誤當終點 → hero 永遠隱形。永遠只讓「最新實例」掌權。
+type MotionGlobal = {
+  __ch4artMotionInit?: () => void;
+  __ch4artMotionCleanup?: () => void;
+  __ch4artMotionBound?: boolean;
+};
+const g = globalThis as unknown as MotionGlobal;
+
+const isReplacement = Boolean(g.__ch4artMotionCleanup);
+g.__ch4artMotionCleanup?.(); // 舊實例先收乾淨(revert 殘留的 inline 樣式)
+g.__ch4artMotionInit = init;
+g.__ch4artMotionCleanup = cleanup;
+
+if (!g.__ch4artMotionBound) {
+  g.__ch4artMotionBound = true;
+  document.addEventListener('astro:page-load', () => g.__ch4artMotionInit?.());
+  document.addEventListener('astro:before-swap', () => g.__ch4artMotionCleanup?.());
+}
+// 模組是「熱替換」進來的(頁面早就載好,astro:page-load 不會再發)→ 立刻重建
+if (isReplacement) init();
