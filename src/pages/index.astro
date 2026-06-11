@@ -40,18 +40,18 @@ const fan = [-8, -1, 7];
       <div class="relative z-10 md:col-span-5" data-hero-model>
         <!-- 鴨鴨溢出 hero 下緣,壓在扇貝分隔線上 -->
         <div class="relative mx-auto max-w-sm translate-y-8 md:translate-y-14">
-          <BlobFrame color="#FFF7F2">
+          <BlobFrame color="#F4EEFF">
             <!-- client:only 在 hydrate 前是空的 —— 外層固定高度防 CLS;
                  poster 放在靜態 background-image,首繪就到位(LCP) -->
             <div
-              style={`height:380px;background:#FFF7F2 url('${withBase('works/mouse-poster.webp')}') center/contain no-repeat;`}
+              style={`height:380px;background:#F4EEFF url('${withBase('works/mouse-poster.webp')}') center/contain no-repeat;`}
             >
               <LazyModelViewer
                 client:only="react"
                 src={modelUrl('mouse.glb')}
                 environment="studio"
                 height="100%"
-                background="#FFF7F2"
+                background="#F4EEFF"
                 poster={withBase('works/mouse-poster.webp')}
               />
             </div>
