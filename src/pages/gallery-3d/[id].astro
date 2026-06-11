@@ -1,0 +1,109 @@
+---
+// 模型詳情頁:滿版互動 viewer + 規格貼紙條 + 內文 + 前後導覽。
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ModelViewer from '../../components/three/ModelViewer.tsx';
+import { getCollection, render } from 'astro:content';
+import { modelUrl } from '../../lib/model';
+import { withBase } from '../../lib/withBase';
+
+export async function getStaticPaths() {
+  const works = (await getCollection('works', ({ data }) => !data.draft)).sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return a.data.order - b.data.order;
+  });
+  return works.map((w, i) => ({
+    params: { id: w.id },
+    props: {
+      work: w,
+      prev: works[(i - 1 + works.length) % works.length],
+      next: works[(i + 1) % works.length],
+    },
+  }));
+}
+
+const { work, prev, next } = Astro.props;
+const { Content } = await render(work);
+
+// 規格貼紙條(有值才顯示)
+const specs = [
+  { emoji: '🧊', label: work.data.software },
+  work.data.polycount ? { emoji: '🔺', label: `${work.data.polycount.toLocaleString()} 面` } : null,
+  { emoji: '💡', label: work.data.environment },
+  work.data.date
+    ? { emoji: '📅', label: work.data.date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'numeric' }) }
+    : null,
+].filter((s) => s !== null);
+
+const specColors = ['var(--color-butter)', 'var(--color-mint)', 'var(--color-lavender)', 'var(--color-coral)'];
+---
+
+<BaseLayout title={`${work.data.title} — ch4art`} description={work.data.description}>
+  <a href={withBase('gallery-3d')} class="btn-pop bg-skyberry px-4 py-1.5 text-sm text-ink">← 回展示間</a>
+
+  <h1 class="sticker title-pop mt-5 text-4xl md:text-5xl" data-text={work.data.title}>{work.data.title}</h1>
+  <p class="mt-3 font-bold text-ink/80">{work.data.description}</p>
+
+  <!-- 規格貼紙條 -->
+  <ul class="mt-4 flex flex-wrap gap-2.5">
+    {
+      specs.map((s, i) => (
+        <li
+          class="spec-chip"
+          style={`--sp-c:${specColors[i % specColors.length]};--sp-tilt:${(i % 2 === 0 ? -2 : 2)}deg;`}
+        >
+          <span aria-hidden="true">{s.emoji}</span> {s.label}
+        </li>
+      ))
+    }
+    {work.data.tags.map((t) => (
+      <li class="spec-chip" style="--sp-c:#fff;--sp-tilt:1deg;">#{t}</li>
+    ))}
+  </ul>
+
+  <div class="card-pop mt-6 p-3" style="height: 480px;">
+    <ModelViewer
+      client:only="react"
+      src={modelUrl(work.data.model)}
+      environment={work.data.environment}
+      height="100%"
+      background={work.data.accent ?? '#FFF0F6'}
+      poster={withBase(`works/${work.data.poster ?? work.data.thumb}`)}
+      turntable={work.data.turntable}
+    />
+  </div>
+  <p class="mt-3 text-center text-sm font-bold text-ink/60">🖱️ 拖曳旋轉 · 滾輪縮放 · 右鍵 / 兩指平移</p>
+
+  <div class="post-body mt-8">
+    <Content />
+  </div>
+
+  <!-- 前後導覽:行李吊牌 -->
+  <nav class="mt-12 grid gap-4 sm:grid-cols-2" aria-label="其他模型">
+    <a href={withBase(`gallery-3d/${prev.id}`)} class="tag-card card-pop anim-wiggle block p-4">
+      <span class="text-xs font-bold text-ink/55">← 上一隻</span>
+      <p class="font-display text-lg text-ink">{prev.data.title}</p>
+    </a>
+    <a href={withBase(`gallery-3d/${next.id}`)} class="tag-card card-pop anim-wiggle block p-4 text-right">
+      <span class="text-xs font-bold text-ink/55">下一隻 →</span>
+      <p class="font-display text-lg text-ink">{next.data.title}</p>
+    </a>
+  </nav>
+</BaseLayout>
+
+<style>
+  .spec-chip {
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--color-ink);
+    background: var(--sp-c, #fff);
+    border: 2.5px solid var(--color-outline);
+    border-radius: 9999px;
+    padding: 5px 14px;
+    transform: rotate(var(--sp-tilt, 0deg));
+    box-shadow: var(--shadow-pop-sm);
+  }
+  .tag-card {
+    transition: transform 0.15s ease;
+  }
+</style>

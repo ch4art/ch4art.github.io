@@ -1,0 +1,150 @@
+---
+// 3D 展示間「玩具櫃」:頂部精選模型站展示台(本頁唯一 WebGL canvas,
+// 慢轉盤、互動即停),下方作品用 GIF 裝「玩具電視框」交錯排,點入詳情頁。
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import ModelViewer from '../../components/three/ModelViewer.tsx';
+import ScallopDivider from '../../components/decor/ScallopDivider.astro';
+import StickerBadge from '../../components/decor/StickerBadge.astro';
+import { modelUrl } from '../../lib/model';
+import { withBase } from '../../lib/withBase';
+
+const works = (await getCollection('works', ({ data }) => !data.draft)).sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+  return a.data.order - b.data.order;
+});
+
+const star = works[0];
+const shelf = works.slice(1);
+const rowMists = ['var(--color-butter-mist)', 'var(--color-mint-mist)', 'var(--color-lavender-mist)'];
+---
+
+<BaseLayout
+  title="模型展示間 — ch4art"
+  description="ch4art 的 3D 模型展示間:每一隻都可以拖著轉圈圈。"
+  fullBleed
+>
+  <ScallopDivider color="var(--color-sky-mist)" flip size={20} />
+  <div class="bg-sky-mist pb-14">
+    <section class="mx-auto max-w-6xl px-4 pt-10">
+      <div class="flex flex-wrap items-center justify-between gap-6">
+        <SectionTitle as="h1" text="模型展示間" emoji="🧸" class="sticker" />
+        <StickerBadge shape="circle" color="var(--color-skyberry)" tilt={5} size={104}>
+          {works.length} 隻<br />住在這
+        </StickerBadge>
+      </div>
+
+      {
+        star && (
+          <div class="pedestal relative mx-auto mt-10 max-w-2xl" data-anim="pedestal">
+            <!-- 星爆背景 -->
+            <svg class="pedestal-burst anim-spin" viewBox="0 0 100 100" aria-hidden="true">
+              <path
+                d="M50 2 L57 14 L70 7 L71 21 L85 19 L80 32 L94 36 L83 45 L93 55 L79 58 L84 72 L70 70 L69 84 L57 77 L50 90 L43 77 L31 84 L30 70 L16 72 L21 58 L7 55 L17 45 L6 36 L20 32 L15 19 L29 21 L30 7 L43 14 Z"
+                fill="var(--color-butter)"
+                opacity="0.55"
+              />
+            </svg>
+            <div class="relative z-10">
+              <ModelViewer
+                client:only="react"
+                src={modelUrl(star.data.model)}
+                environment={star.data.environment}
+                height={420}
+                background={star.data.accent ?? '#FFF7F2'}
+                poster={withBase(`works/${star.data.poster ?? star.data.thumb}`)}
+                turntable
+              />
+            </div>
+            <!-- 展示台(半圓地板) -->
+            <svg class="pedestal-floor" viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M2 22 A 48 40 0 0 1 98 22 Z" fill="var(--color-skyberry)" stroke="var(--color-outline)" stroke-width="2" />
+            </svg>
+            <div class="relative z-10 -mt-2 text-center">
+              <h2 class="title-pop inline-block text-3xl" data-text={star.data.title}>{star.data.title}</h2>
+              <p class="mt-2 font-bold text-ink/75">{star.data.description}</p>
+              <a
+                href={withBase(`gallery-3d/${star.id}`)}
+                class="btn-pop anim-wiggle mt-4 inline-block bg-bubblegum px-6 py-2.5 text-ink"
+              >
+                全螢幕把玩 →
+              </a>
+            </div>
+          </div>
+        )
+      }
+    </section>
+  </div>
+  <ScallopDivider color="var(--color-sky-mist)" size={20} />
+
+  <!-- ===== 玩具櫃:交錯列(GIF 玩具電視,不開額外 canvas) ===== -->
+  <section class="mx-auto mt-16 max-w-5xl space-y-14 px-4">
+    {
+      shelf.map((w, i) => (
+        <a
+          href={withBase(`gallery-3d/${w.id}`)}
+          class:list={['shelf-row group grid items-center gap-8 md:grid-cols-2', i % 2 === 1 && 'shelf-row-flip']}
+          style={`--row-mist:${rowMists[i % rowMists.length]};`}
+          data-anim="shelf-row"
+        >
+          <div class:list={['toy-tv relative mx-auto w-full max-w-[300px]', i % 2 === 1 && 'md:order-2']}>
+            <svg class="absolute -top-7 left-1/2 -ml-9" width="72" height="30" viewBox="0 0 72 30" aria-hidden="true">
+              <g stroke="var(--color-outline)" stroke-width="4" stroke-linecap="round">
+                <line x1="22" y1="28" x2="8" y2="6" />
+                <line x1="50" y1="28" x2="64" y2="6" />
+              </g>
+              <circle cx="8" cy="6" r="5" fill="var(--color-bubblegum-deep)" />
+              <circle cx="64" cy="6" r="5" fill="var(--color-sunshine)" />
+            </svg>
+            <div class="overflow-hidden rounded-[1.5rem] border-[3px] border-outline bg-white p-2 shadow-pop transition-transform duration-200 group-hover:rotate-[-1.5deg] group-hover:scale-[1.02]">
+              <img
+                src={withBase(`works/${w.data.thumb}`)}
+                alt={`旋轉中的「${w.data.title}」3D 模型`}
+                width="300"
+                height="300"
+                loading="lazy"
+                class="w-full rounded-[1rem]"
+                style={`aspect-ratio:1/1;object-fit:contain;background:${w.data.accent ?? '#FFF0F6'};`}
+              />
+            </div>
+          </div>
+          <div class:list={['rounded-[2rem] border-[3px] border-outline p-6 shadow-pop', i % 2 === 1 && 'md:order-1']} style="background:var(--row-mist);">
+            <h2 class="title-pop text-2xl md:text-3xl" data-text={w.data.title}>{w.data.title}</h2>
+            <p class="mt-3 font-bold leading-relaxed text-ink/80">{w.data.description}</p>
+            {w.data.tags.length > 0 && (
+              <ul class="mt-4 flex flex-wrap gap-2">
+                {w.data.tags.map((t) => (
+                  <li class="rounded-pill border-2 border-outline bg-white px-3 py-1 text-xs font-bold text-ink">#{t}</li>
+                ))}
+              </ul>
+            )}
+            <span class="btn-pop mt-5 inline-block bg-skyberry px-5 py-2 text-sm text-ink">拿起來玩 →</span>
+          </div>
+        </a>
+      ))
+    }
+    {shelf.length === 0 && works.length <= 1 && (
+      <p class="card-pop p-10 text-center font-bold text-ink/60">櫃子還在補貨 🧸</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .pedestal-burst {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    width: 240px;
+    height: 240px;
+    margin-left: -120px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .pedestal-floor {
+    display: block;
+    width: 78%;
+    height: 30px;
+    margin: -10px auto 0;
+  }
+</style>

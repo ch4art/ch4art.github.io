@@ -5,6 +5,8 @@ model: duck.glb
 thumb: duck.gif
 environment: city
 order: 1
+featured: true
+turntable: true
 tags: ["可愛", "經典"]
 ---
 

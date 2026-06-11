@@ -18,8 +18,7 @@ export default defineConfig({
   // 既有外部連結都還指向 /portfolio,不可 404。
   redirects: {
     '/portfolio': '/gallery-3d',
-    // TODO(phase 6):gallery-3d/[id].astro 建好後解除註解
-    // '/portfolio/[id]': '/gallery-3d/[id]',
+    '/portfolio/[id]': '/gallery-3d/[id]',
     '/contact': '/about',
   },
 
