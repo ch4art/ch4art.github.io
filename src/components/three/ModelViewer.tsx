@@ -1,6 +1,10 @@
 // THE reusable 3D viewer: model CENTERED, viewed HEAD-ON, scaled up to ~fill
-// the frame. Uses drei <Center> + <Resize> (normalize any model to ~1 unit and
-// center it) + a fixed front-facing camera. No hand-rolled math, no 3/4 angle.
+// the frame, with a fixed front-facing camera.
+//
+// 正規化不用 drei 的 <Center>/<Resize>(它們吃「包圍盒」—— 一條細長的
+// 尾巴/天線就會把包圍盒撐大、重心拉偏,主體變小又偏一邊)。改用
+// 「質心 + 90 百分位半徑」:任何模型都以『主體』置中、定大小,
+// 細長突出物不影響構圖。
 //
 // Deps: react@19, @react-three/fiber@9, @react-three/drei@10, three@0.184
 // ALWAYS hydrate at the call site with client:only="react".
@@ -11,15 +15,9 @@
 import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import {
-  OrbitControls,
-  Center,
-  Resize,
-  Environment,
-  useGLTF,
-  Html,
-  useProgress,
-} from '@react-three/drei';
+import { OrbitControls, Environment, useGLTF, Html, useProgress } from '@react-three/drei';
+import { Mesh, Vector3 } from 'three';
+import type { Object3D, BufferAttribute, InterleavedBufferAttribute } from 'three';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { dracoPath } from '../../lib/model';
 
@@ -49,12 +47,54 @@ type ModelViewerProps = {
   turntable?: boolean;
 };
 
+// 主體半徑要縮放到的目標(配 camera z=1.9 / fov 35:可視半高 ≈ 0.6)。
+const TARGET_RADIUS = 0.5;
+
+/** 質心 + 90 百分位半徑正規化:回傳讓模型置中、大小一致的 group 變換。 */
+function normalize(object: Object3D): { offset: [number, number, number]; scale: number } {
+  object.updateMatrixWorld(true);
+  const v = new Vector3();
+  const sum = new Vector3();
+  const samples: Vector3[] = [];
+  object.traverse((child) => {
+    if (!(child as Mesh).isMesh) return;
+    const pos = (child as Mesh).geometry.getAttribute('position') as
+      | BufferAttribute
+      | InterleavedBufferAttribute
+      | undefined;
+    if (!pos) return;
+    // 每個 mesh 最多取 ~2000 個頂點當樣本,夠準又便宜
+    const step = Math.max(1, Math.floor(pos.count / 2000));
+    for (let i = 0; i < pos.count; i += step) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(child.matrixWorld);
+      sum.add(v);
+      samples.push(v.clone());
+    }
+  });
+  if (samples.length === 0) return { offset: [0, 0, 0], scale: 1 };
+  const center = sum.divideScalar(samples.length);
+  // 垂直置中用「高度範圍中點」(2–98 百分位):屁屁重的模型質心偏低,
+  // 用質心會整隻往上跑;水平(x/z)維持質心,細尾巴才不會拉偏構圖。
+  const ys = samples.map((p) => p.y).sort((a, b) => a - b);
+  const yMid = (ys[Math.floor(ys.length * 0.02)] + ys[Math.floor(ys.length * 0.98)]) / 2;
+  center.y = yMid;
+  const dists = samples.map((p) => p.distanceTo(center)).sort((a, b) => a - b);
+  const r90 = dists[Math.floor(dists.length * 0.9)] || 1;
+  const scale = TARGET_RADIUS / r90;
+  return { offset: [-center.x * scale, -center.y * scale, -center.z * scale], scale };
+}
+
 function Model({ src }: { src: string }) {
   const { scene } = useGLTF(src, DRACO);
   // SkeletonUtils.clone keeps skinned meshes intact when a cached model is reused
   // (a plain scene.clone() renders rigged models invisible).
   const object = useMemo(() => skeletonClone(scene), [scene]);
-  return <primitive object={object} />;
+  const { offset, scale } = useMemo(() => normalize(object), [object]);
+  return (
+    <group position={offset} scale={scale}>
+      <primitive object={object} />
+    </group>
+  );
 }
 
 function Loader() {
@@ -174,12 +214,8 @@ export default function ModelViewer({
             <directionalLight position={[4, 6, 5]} intensity={1.3} />
             <Suspense fallback={<Loader />}>
               <Environment preset={environment} />
-              {/* Normalize to ~1 unit (Resize) and center it (Center). */}
-              <Center precise>
-                <Resize precise>
-                  <Model src={src} />
-                </Resize>
-              </Center>
+              {/* Model 內建質心正規化:置中 + 大小一致(見 normalize) */}
+              <Model src={src} />
             </Suspense>
             <OrbitControls
               makeDefault
