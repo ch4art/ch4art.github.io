@@ -1,0 +1,87 @@
+---
+// 貼紙徽章:星爆 / 圓形 / 愛心底 + 白色 die-cut 邊環 + 微傾斜。
+// 內容走 slot(文字保持水平可讀,整體傾斜)。
+interface Props {
+  shape?: 'burst' | 'circle' | 'heart';
+  color?: string; // 底色 token,如 var(--color-butter)
+  tilt?: number; // 度
+  size?: number; // px
+  class?: string;
+}
+const {
+  shape = 'burst',
+  color = 'var(--color-butter)',
+  tilt = -6,
+  size = 110,
+  class: cls = '',
+} = Astro.props;
+---
+
+<span
+  class={`badge ${cls}`}
+  style={`--bd-c:${color};--bd-tilt:${tilt}deg;width:${size}px;height:${size}px;`}
+>
+  {
+    shape === 'burst' && (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        {/* 12 齒星爆 */}
+        <path
+          d="M50 2 L57 14 L70 7 L71 21 L85 19 L80 32 L94 36 L83 45 L93 55 L79 58 L84 72 L70 70 L69 84 L57 77 L50 90 L43 77 L31 84 L30 70 L16 72 L21 58 L7 55 L17 45 L6 36 L20 32 L15 19 L29 21 L30 7 L43 14 Z"
+          fill="var(--bd-c)"
+          stroke="var(--color-outline)"
+          stroke-width="3"
+          stroke-linejoin="round"
+        />
+      </svg>
+    )
+  }
+  {
+    shape === 'circle' && (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="44" fill="var(--bd-c)" stroke="var(--color-outline)" stroke-width="3" />
+      </svg>
+    )
+  }
+  {
+    shape === 'heart' && (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path
+          d="M50 88 C26 70 10 56 10 36 C10 22 21 14 32 14 C40 14 47 18 50 26 C53 18 60 14 68 14 C79 14 90 22 90 36 C90 56 74 70 50 88 Z"
+          fill="var(--bd-c)"
+          stroke="var(--color-outline)"
+          stroke-width="3"
+          stroke-linejoin="round"
+        />
+      </svg>
+    )
+  }
+  <span class="badge-label"><slot /></span>
+</span>
+
+<style>
+  .badge {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    transform: rotate(var(--bd-tilt));
+    /* die-cut 白邊:貼紙剛撕下來的感覺 */
+    filter: drop-shadow(0 0 0 #fff) drop-shadow(2px 3px 0 rgba(58, 46, 69, 0.28));
+  }
+  .badge svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .badge-label {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-label);
+    font-weight: 700;
+    color: var(--color-ink);
+    text-align: center;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    padding: 0 16%;
+  }
+</style>

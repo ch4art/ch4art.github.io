@@ -1,0 +1,27 @@
+---
+// 區塊標題:雙層貼紙字(title-pop)。emoji 放在 data-text 外,
+// 避免粉紅底層出現幽靈 emoji(global.css .title-pop 的規則)。
+interface Props {
+  text: string;
+  emoji?: string;
+  /** 'hero' 用 --text-hero + 粗描邊;預設 'section' */
+  level?: 'hero' | 'section';
+  as?: 'h1' | 'h2' | 'h3';
+  class?: string;
+}
+const { text, emoji, level = 'section', as: Tag = 'h2', class: cls = '' } = Astro.props as Props;
+const sizeCls = level === 'hero' ? 'text-hero title-pop-hero' : 'text-section';
+---
+
+<Tag class={`title-pop ${sizeCls} ${cls}`} data-text={text} data-anim="pop">
+  {text}
+  {emoji && <span class="title-emoji">{emoji}</span>}
+</Tag>
+
+<style>
+  .title-emoji {
+    -webkit-text-stroke: 0;
+    display: inline-block;
+    margin-left: 0.15em;
+  }
+</style>

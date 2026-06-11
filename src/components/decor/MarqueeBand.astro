@@ -1,0 +1,72 @@
+---
+// 跑馬燈帶:棋盤格底 + 無限循環文字。
+// 內容複製兩份做 seamless loop;CSS 動畫先行,phase 8 由 GSAP 接手
+// (data-marquee-track 是 GSAP 的掛鉤)。
+interface Props {
+  items: string[];
+  checkerA?: string;
+  checkerB?: string;
+  /** 跑一輪秒數 */
+  duration?: number;
+  class?: string;
+}
+const {
+  items,
+  checkerA = 'var(--color-butter)',
+  checkerB = '#fff',
+  duration = 22,
+  class: cls = '',
+} = Astro.props;
+const line = items.join('  ✦  ');
+---
+
+<div
+  class={`marquee bg-checker ${cls}`}
+  style={`--checker-a:${checkerA};--checker-b:${checkerB};--mq-dur:${duration}s;`}
+  aria-hidden="true"
+>
+  <div class="marquee-track" data-marquee-track>
+    <span class="marquee-chunk">{line}&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+    <span class="marquee-chunk">{line}&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    border-top: 3px solid var(--color-outline);
+    border-bottom: 3px solid var(--color-outline);
+    padding: 10px 0;
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    white-space: nowrap;
+  }
+  .marquee-chunk {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--color-ink);
+    /* 白色描邊讓文字浮在棋盤格上 */
+    text-shadow:
+      -2px -2px 0 #fff,
+      2px -2px 0 #fff,
+      -2px 2px 0 #fff,
+      2px 2px 0 #fff;
+    padding-right: 0.5rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+      animation: marquee-roll var(--mq-dur) linear infinite;
+    }
+    .marquee:hover .marquee-track {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes marquee-roll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

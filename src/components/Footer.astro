@@ -1,0 +1,67 @@
+---
+// 頁尾:bubblegum 大波浪 + 老鼠探頭 + 導覽/RSS。
+import { withBase } from '../lib/withBase';
+import WaveDivider from './decor/WaveDivider.astro';
+import Mascot from './decor/Mascot.astro';
+
+const year = new Date().getFullYear();
+const links = [
+  { href: withBase(''), label: '首頁' },
+  { href: withBase('gallery-2d'), label: '畫畫' },
+  { href: withBase('gallery-3d'), label: '模型' },
+  { href: withBase('blog'), label: '部落格' },
+  { href: withBase('about'), label: '關於' },
+];
+---
+
+<footer class="footer relative z-10 mt-20">
+  <!-- 老鼠從波浪後探頭 -->
+  <div class="peek" aria-hidden="true">
+    <Mascot size={88} />
+  </div>
+  <WaveDivider color="var(--color-bubblegum)" />
+  <div class="bg-bubblegum">
+    <div class="mx-auto max-w-5xl px-4 pb-8 pt-2 text-center">
+      <nav class="flex flex-wrap justify-center gap-x-5 gap-y-1 font-display font-semibold text-ink">
+        {links.map((l) => <a class="footer-link" href={l.href}>{l.label}</a>)}
+        <a class="footer-link" href={withBase('rss.xml')}>RSS</a>
+      </nav>
+      <p class="mt-3 text-sm font-semibold text-ink/80">
+        © {year} ch4art ✦ 手作可愛,每一筆都是
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    /* 波浪上緣以上要能看到探頭的老鼠 */
+    overflow: visible;
+  }
+  .peek {
+    position: relative;
+    height: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 12%;
+  }
+  .peek :global(svg) {
+    transform: translateY(-46px);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .peek :global(svg) {
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .footer:hover .peek :global(svg) {
+      transform: translateY(-62px) rotate(-4deg);
+    }
+  }
+  .footer-link {
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+  .footer-link:hover {
+    transform: translateY(-2px) rotate(-2deg);
+    text-decoration: underline wavy var(--color-bubblegum-deep);
+  }
+</style>

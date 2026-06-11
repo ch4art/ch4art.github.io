@@ -1,0 +1,44 @@
+---
+// 扇貝分隔線:一排半圓,銜接兩個 mist 色塊。
+// color = 「凸出來那一側」的區塊底色(CSS 色值或 var(--color-…))。
+// flip=false(預設):半圓朝下凸(上方區塊的下緣)。
+// flip=true:半圓朝上凸(下方區塊的上緣)。
+interface Props {
+  color: string;
+  flip?: boolean;
+  /** 半圓半徑 px */
+  size?: number;
+  class?: string;
+}
+const { color, flip = false, size = 20, class: cls = '' } = Astro.props;
+---
+
+<div
+  class={`scallop ${cls}`}
+  style={`--sc-c:${color};--sc-r:${size}px;`}
+  data-flip={flip ? 'true' : undefined}
+  aria-hidden="true"
+>
+</div>
+
+<style>
+  .scallop {
+    height: var(--sc-r);
+    background-image: radial-gradient(
+      circle at 50% 0%,
+      var(--sc-c) 62%,
+      transparent 65%
+    );
+    background-size: calc(var(--sc-r) * 2.2) var(--sc-r);
+    background-repeat: repeat-x;
+    background-position: center top;
+  }
+  .scallop[data-flip='true'] {
+    background-image: radial-gradient(
+      circle at 50% 100%,
+      var(--sc-c) 62%,
+      transparent 65%
+    );
+    background-position: center bottom;
+  }
+</style>

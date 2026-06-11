@@ -1,0 +1,43 @@
+---
+// 紙膠帶:半透明條紋小貼條,貼在拍立得/便利貼的角上。
+interface Props {
+  color?: string;
+  tilt?: number;
+  /** 絕對定位字串,如 "top:-10px;left:18%" */
+  position?: string;
+  width?: number;
+  class?: string;
+}
+const {
+  color = 'var(--color-bubblegum)',
+  tilt = -8,
+  position = 'top:-12px;left:50%;margin-left:-36px',
+  width = 72,
+  class: cls = '',
+} = Astro.props;
+---
+
+<span
+  class={`washi ${cls}`}
+  style={`--wt-c:${color};--wt-tilt:${tilt}deg;width:${width}px;${position};`}
+  aria-hidden="true"
+>
+</span>
+
+<style>
+  .washi {
+    position: absolute;
+    height: 22px;
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--wt-c) 0 8px,
+      color-mix(in srgb, var(--wt-c) 55%, #fff) 8px 16px
+    );
+    opacity: 0.82;
+    transform: rotate(var(--wt-tilt));
+    border-left: 2px dashed rgba(255, 255, 255, 0.7);
+    border-right: 2px dashed rgba(255, 255, 255, 0.7);
+    box-shadow: 0 1px 3px rgba(58, 46, 69, 0.18);
+    z-index: 2;
+  }
+</style>

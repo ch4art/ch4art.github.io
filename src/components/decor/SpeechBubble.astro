@@ -1,0 +1,60 @@
+---
+// 漫畫對話泡泡:白底黑框 + 小尾巴。tail 控制尾巴方位。
+interface Props {
+  tail?: 'bottom-left' | 'bottom-right' | 'left' | 'right';
+  color?: string; // 底色
+  tilt?: number;
+  class?: string;
+}
+const { tail = 'bottom-left', color = '#fff', tilt = 0, class: cls = '' } = Astro.props;
+---
+
+<span class={`bubble bubble-${tail} ${cls}`} style={`--bb-c:${color};--bb-tilt:${tilt}deg;`}>
+  <slot />
+</span>
+
+<style>
+  .bubble {
+    position: relative;
+    display: inline-block;
+    background: var(--bb-c);
+    border: 3px solid var(--color-outline);
+    border-radius: var(--radius-blob);
+    box-shadow: var(--shadow-pop-sm);
+    padding: 0.5rem 1rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-ink);
+    transform: rotate(var(--bb-tilt));
+  }
+  .bubble::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: var(--bb-c);
+    border: 3px solid var(--color-outline);
+    border-top: none;
+    border-left: none;
+  }
+  .bubble-bottom-left::after {
+    bottom: -10px;
+    left: 22%;
+    transform: rotate(45deg);
+  }
+  .bubble-bottom-right::after {
+    bottom: -10px;
+    right: 22%;
+    transform: rotate(45deg);
+  }
+  .bubble-left::after {
+    left: -10px;
+    top: 40%;
+    transform: rotate(135deg);
+  }
+  .bubble-right::after {
+    right: -10px;
+    top: 40%;
+    transform: rotate(-45deg);
+  }
+</style>

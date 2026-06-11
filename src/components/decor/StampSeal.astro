@@ -1,0 +1,41 @@
+---
+// 橡皮章:圓形章 + 中央文字,微傾斜。GSAP 在文末「砸」下來(data-anim="stamp")。
+interface Props {
+  text: string;
+  color?: string;
+  size?: number;
+  tilt?: number;
+  class?: string;
+}
+const { text, color = 'var(--color-bubblegum-deep)', size = 110, tilt = -8, class: cls = '' } = Astro.props;
+---
+
+<span
+  class={`stamp ${cls}`}
+  style={`--st-c:${color};--st-tilt:${tilt}deg;width:${size}px;height:${size}px;`}
+  data-anim="stamp"
+>
+  <span class="stamp-text">{text}</span>
+</span>
+
+<style>
+  .stamp {
+    display: inline-grid;
+    place-items: center;
+    border: 4px solid var(--st-c);
+    border-radius: 50%;
+    outline: 2px solid var(--st-c);
+    outline-offset: 3px;
+    transform: rotate(var(--st-tilt));
+    background: color-mix(in srgb, var(--st-c) 8%, transparent);
+  }
+  .stamp-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--st-c);
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 10px;
+  }
+</style>

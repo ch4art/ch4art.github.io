@@ -2,27 +2,33 @@
 import { ClientRouter } from 'astro:transitions';
 import '@fontsource-variable/fredoka';
 import '@fontsource-variable/baloo-2';
-import '@fontsource-variable/quicksand';
 import '@fontsource-variable/nunito';
 // 圓胖中文標題字型(粉圓 Huninn)— 只載繁中子集,讓中文標題跟英文一樣可愛。
 import '@fontsource/huninn/chinese-traditional-400.css';
 import '@fontsource/huninn/latin-400.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
-import Decor from '../components/Decor.astro';
+import Footer from '../components/Footer.astro';
+import DecorField from '../components/decor/DecorField.astro';
 
 interface Props {
   title?: string;
   description?: string;
+  /** 文章可帶 heroImage 當 og:image(絕對 URL 由這裡組) */
+  ogImage?: string;
+  /** 滿幅頁(首頁 hero)把 main 的盒寬交給頁面自己控制 */
+  fullBleed?: boolean;
 }
 
 const {
-  title = 'Cute 3D Art',
+  title = 'ch4art — 可愛的畫畫與 3D 模型',
   description = '可愛的藝術與 3D 建模作品集 + 部落格',
+  ogImage,
+  fullBleed = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL('og.png', Astro.site);
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : new URL('og.png', Astro.site);
 ---
 
 <!doctype html>
@@ -46,22 +52,34 @@ const ogImage = new URL('og.png', Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta property="og:site_name" content="ch4art" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <title>{title}</title>
     <ClientRouter />
   </head>
   <body class="bg-cream text-ink font-body min-h-screen">
-    <Decor />
+    <!-- 視差裝飾層跨頁存活(persist),換頁不重生形狀 -->
+    <div transition:persist="decor-field">
+      <DecorField />
+    </div>
     <Nav />
-    <main class="relative z-10 mx-auto max-w-5xl px-4 py-8">
-      <slot />
-    </main>
+    {
+      fullBleed ? (
+        <main class="relative z-10">
+          <slot />
+        </main>
+      ) : (
+        <main class="relative z-10 mx-auto max-w-5xl px-4 py-8">
+          <slot />
+        </main>
+      )
+    }
+    <Footer />
 
     <script>
       // 點擊回饋:在點擊處迸出小星星(尊重減少動態偏好;document 層級,
@@ -72,7 +90,16 @@ const ogImage = new URL('og.png', Astro.site);
         w.__sparkBound = true;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-        const COLORS = ['#FF9FCB', '#F2569E', '#9AD3FF', '#FFE27A', '#9B6DFF', '#5FE0DA'];
+        const COLORS = [
+          '#FF9FCB',
+          '#F2569E',
+          '#FF6FAE',
+          '#9AD3FF',
+          '#FFE27A',
+          '#FFC83D',
+          '#9B6DFF',
+          '#5FE0DA',
+        ];
         const GLYPHS = ['✦', '✧', '●', '★'];
 
         document.addEventListener('pointerdown', (e) => {

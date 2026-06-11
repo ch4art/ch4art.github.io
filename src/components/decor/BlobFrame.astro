@@ -1,0 +1,23 @@
+---
+// 有機 blob 外框:非對稱圓角 + 粗框 + hard shadow(hero 模型 / about 頭像)。
+interface Props {
+  color?: string; // 內底色
+  class?: string;
+}
+const { color = 'var(--color-pink-mist)', class: cls = '' } = Astro.props;
+---
+
+<div class={`blob-frame ${cls}`} style={`--bf-c:${color};`}>
+  <slot />
+</div>
+
+<style>
+  .blob-frame {
+    position: relative;
+    background: var(--bf-c);
+    border: 4px solid var(--color-outline);
+    border-radius: var(--radius-squish);
+    box-shadow: var(--shadow-pop-lg);
+    overflow: hidden;
+  }
+</style>

@@ -1,33 +1,65 @@
 ---
+// 導覽列 v2:左側老鼠 + ch4art 字標,右側糖果藥丸連結。
+// 行動版收成兩行置中;桌面單行(≤80px 高)。
 import { withBase } from '../lib/withBase';
+import Mascot from './decor/Mascot.astro';
 
 const links = [
   { href: withBase(''), label: '首頁', cls: 'bg-bubblegum' },
-  { href: withBase('portfolio'), label: '作品集', cls: 'bg-skyberry' },
+  { href: withBase('gallery-2d'), label: '畫畫', cls: 'bg-coral' },
+  { href: withBase('gallery-3d'), label: '模型', cls: 'bg-skyberry' },
   { href: withBase('blog'), label: '部落格', cls: 'bg-butter' },
-  { href: withBase('contact'), label: '合作', cls: 'bg-mint' },
+  { href: withBase('about'), label: '關於', cls: 'bg-mint' },
 ];
 
 const current = Astro.url.pathname.replace(/\/$/, '');
 ---
 
-<nav class="relative z-10 flex flex-wrap gap-4 justify-center py-6">
-  {
-    links.map((l) => {
-      const isActive = current === l.href.replace(/\/$/, '');
-      return (
-        <a
-          href={l.href}
-          aria-current={isActive ? 'page' : undefined}
-          class:list={[
-            'btn-pop anim-wiggle text-lg px-6 py-2.5 text-ink',
-            l.cls,
-            isActive && '-translate-y-1',
-          ]}
-        >
-          {l.label}
-        </a>
-      );
-    })
+<header class="relative z-20">
+  <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-3 px-4 py-4 sm:justify-between">
+    <a href={withBase('')} class="brand flex items-center gap-2" aria-label="ch4art 首頁">
+      <Mascot size={44} />
+      <span class="brand-word font-label text-2xl font-bold text-ink">ch4art</span>
+    </a>
+    <div class="flex flex-wrap justify-center gap-3">
+      {
+        links.map((l) => {
+          const isActive = current === l.href.replace(/\/$/, '');
+          return (
+            <a
+              href={l.href}
+              aria-current={isActive ? 'page' : undefined}
+              class:list={[
+                'btn-pop anim-wiggle px-5 py-2 text-base text-ink',
+                l.cls,
+                isActive && 'nav-active',
+              ]}
+            >
+              {l.label}
+            </a>
+          );
+        })
+      }
+    </div>
+  </nav>
+</header>
+
+<style>
+  .brand-word {
+    letter-spacing: 0.02em;
   }
-</nav>
+  @media (hover: hover) {
+    .brand:hover .brand-word {
+      text-decoration: underline wavy var(--color-bubblegum-deep);
+    }
+    .brand:hover :global(svg) {
+      transform: rotate(-6deg);
+      transition: transform 0.2s ease;
+    }
+  }
+  /* 目前頁:壓下去 + 內凹影,像被按住的鍵 */
+  .nav-active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 0 var(--color-outline);
+  }
+</style>

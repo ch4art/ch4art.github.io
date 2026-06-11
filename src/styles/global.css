@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 /* ===================================================================
-   Design tokens — Sanrio-cute × Memphis × cartoon.
+   Design tokens v2 — Sanrio-cute × Memphis × cartoon.
    Each @theme var is BOTH a CSS variable AND a Tailwind utility
    (bg-bubblegum, text-ink, rounded-blob, shadow-pop, font-display…).
+
+   v2 layering rule(讓鮮豔不變成噪音):
+   - 頁面基底永遠是 cream + 點點。
+   - 每個大區塊坐在一種「mist」淡色上,區塊之間用扇貝/波浪分隔線。
+   - 飽和「deep」色只給 hero 表面、按鈕、徽章、跑馬燈帶 —
+     鮮豔住在大色塊裡,不是散落的小 accent。
    =================================================================== */
 @theme {
-  /* Sanrio pastels */
+  /* Sanrio pastels(v1 原樣保留) */
   --color-cream:          #FFF7F2;
   --color-bubblegum:      #FF9FCB;
   --color-bubblegum-deep: #F2569E;
@@ -16,10 +22,24 @@
   --color-lavender:       #D8C7FF;
   --color-coral:          #FFB59E;
 
-  /* Memphis pops (saturated accents) */
+  /* Memphis pops(v1 原樣保留) */
   --color-grape:          #9B6DFF;
   --color-tangerine:      #FF8A5B;
   --color-aqua:           #5FE0DA;
+
+  /* v2 新增:deep 層 — 飽和中間調,可當大面積表面 */
+  --color-strawberry:     #FF6FAE;
+  --color-sky-deep:       #5BB8FF;
+  --color-mint-deep:      #4ED9A4;
+  --color-sunshine:       #FFC83D;
+  --color-grape-deep:     #7C4DFF;
+
+  /* v2 新增:mist 層 — 區塊底色(色塊分區用) */
+  --color-pink-mist:      #FFE9F3;
+  --color-sky-mist:       #EAF5FF;
+  --color-mint-mist:      #EAFBF2;
+  --color-butter-mist:    #FFF7DC;
+  --color-lavender-mist:  #F4EEFF;
 
   --color-ink:            #4A3A55;
   --color-outline:        #3A2E45; /* cartoon outline (soft near-black) */
@@ -28,17 +48,36 @@
   --radius-soft: 1rem;
   --radius-pill: 9999px;
   --radius-blob: 1.75rem;
+  --radius-scoop: 2.5rem;                                  /* 大區塊卡 */
 
   /* Shadows — Memphis/cartoon HARD offset shadows (no blur) */
-  --shadow-soft:   0 8px 24px -8px rgba(242, 86, 158, 0.35);
-  --shadow-pop:    5px 5px 0 0 var(--color-outline);
-  --shadow-pop-sm: 3px 3px 0 0 var(--color-outline);
+  --shadow-soft:    0 8px 24px -8px rgba(242, 86, 158, 0.35);
+  --shadow-pop:     5px 5px 0 0 var(--color-outline);
+  --shadow-pop-sm:  3px 3px 0 0 var(--color-outline);
+  --shadow-pop-lg:  8px 8px 0 0 var(--color-outline);      /* hero 級 */
+  --shadow-pop-pink: 5px 5px 0 0 var(--color-bubblegum-deep);
+  /* 貼紙白邊環:先一圈白色 die-cut 邊,再 hard offset —「剛撕下來的貼紙」 */
+  --shadow-sticker: 0 0 0 5px #fff, 7px 7px 0 5px var(--color-outline);
+  --shadow-sticker-sm: 0 0 0 4px #fff, 5px 5px 0 4px var(--color-outline);
+
+  /* Type scale — v2 標題大幅放大(clamp 響應式) */
+  --text-hero: clamp(3rem, 9vw, 7rem);
+  --text-hero--line-height: 1.05;
+  --text-section: clamp(2.2rem, 5vw, 3.5rem);
+  --text-section--line-height: 1.15;
 
   /* Fonts — everything rounded & cute. Latin uses Fredoka/Nunito (rounded);
      CJK has no glyphs there so it falls through to Huninn (粉圓, rounded) for
-     BOTH titles and body, so all Chinese is round, not the formal system font. */
+     BOTH titles and body. Baloo 2 = 英文小標籤的「貼紙嗓音」。 */
   --font-display: "Fredoka Variable", "Huninn", "Baloo 2 Variable", system-ui, sans-serif;
-  --font-body:    "Nunito Variable", "Huninn", "Quicksand Variable", system-ui, sans-serif;
+  --font-body:    "Nunito Variable", "Huninn", system-ui, sans-serif;
+  --font-label:   "Baloo 2 Variable", "Huninn", system-ui, sans-serif;
+}
+
+/* 有機 blob(非對稱圓角,給 BlobFrame / 大圖框) — 不進 @theme,
+   因為 Tailwind 的 --radius-* 吃單值;這裡當純 CSS 變數用。 */
+:root {
+  --radius-squish: 38% 62% 55% 45% / 50% 40% 60% 50%;
 }
 
 /* ===================================================================
@@ -119,16 +158,65 @@ body {
     paint-order: stroke fill;
     pointer-events: none;
   }
+  /* hero 級貼紙標題:更粗的描邊撐得住 7rem 字 */
+  .title-pop-hero {
+    -webkit-text-stroke: 3.5px var(--color-outline);
+  }
+  .title-pop-hero::before {
+    -webkit-text-stroke: 3.5px var(--color-outline);
+  }
 
   /* Slight playful tilt, like a peeled sticker. */
   .sticker {
     display: inline-block;
     transform: rotate(-2deg);
   }
+
+  /* 貼紙白邊環 utility(圖片、徽章、拍立得用) */
+  .sticker-ring {
+    box-shadow: var(--shadow-sticker);
+  }
+  .sticker-ring-sm {
+    box-shadow: var(--shadow-sticker-sm);
+  }
+
+  /* 棋盤格帶(MarqueeBand / 分隔帶背景) */
+  .bg-checker {
+    background-image: repeating-conic-gradient(
+      var(--checker-a, var(--color-butter)) 0% 25%,
+      var(--checker-b, #fff) 0% 50%
+    );
+    background-size: 36px 36px;
+  }
+
+  /* 45° 糖果條紋(閱讀進度條 / 紙膠帶) */
+  .bg-candy-stripe {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--stripe-a, var(--color-bubblegum)) 0 12px,
+      var(--stripe-b, var(--color-pink-mist)) 12px 24px
+    );
+  }
+
+  /* 橫線筆記本卡(首頁最新文章) */
+  .bg-ruled {
+    background-image: repeating-linear-gradient(
+      transparent 0 calc(var(--ruled-gap, 2.2rem) - 2px),
+      var(--ruled-line, rgba(154, 211, 255, 0.55)) calc(var(--ruled-gap, 2.2rem) - 2px)
+        var(--ruled-gap, 2.2rem)
+    );
+  }
+
+  /* 裁切線虛線框(blog 標籤「貼紙紙」) */
+  .perforated {
+    border: 3px dashed var(--color-bubblegum);
+    border-radius: var(--radius-blob);
+  }
 }
 
 /* ===================================================================
-   Animations (motion-safe only)
+   Animations (motion-safe only) — 大動效交給 GSAP(scripts/motion.ts),
+   這裡只留便宜的 CSS 常駐小動畫。
    =================================================================== */
 @keyframes floaty {
   0%,
@@ -153,6 +241,16 @@ body {
     transform: rotate(360deg);
   }
 }
+/* 載入 pill 的小彈跳(3D loader / mascot) */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .anim-float {
@@ -163,6 +261,9 @@ body {
   }
   .anim-spin {
     animation: spin-slow 16s linear infinite;
+  }
+  .anim-bob {
+    animation: bob 1.6s ease-in-out infinite;
   }
 }
 
@@ -273,6 +374,7 @@ body {
 
 /* ===================================================================
    Cute cursor (粉紅星星;互動元素 → 粉紅愛心) + click sparkles
+   品牌簽名互動(v1 起),非預設裝飾。
    =================================================================== */
 html,
 body {
@@ -375,7 +477,7 @@ input[type='file'] {
   80% { transform: translateX(4px); }
 }
 
-/* 3D 模型載入中的小提示 */
+/* 3D 模型載入中的小提示(v2:加上彈跳) */
 .model-loader {
   font-weight: 800;
   color: var(--color-ink);
@@ -385,4 +487,9 @@ input[type='file'] {
   padding: 8px 18px;
   box-shadow: 4px 4px 0 0 var(--color-outline);
   white-space: nowrap;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .model-loader {
+    animation: bob 1.6s ease-in-out infinite;
+  }
 }

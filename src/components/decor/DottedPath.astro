@@ -1,0 +1,37 @@
+---
+// 虛線路徑:部落格時間軸的脊椎(GSAP strokeDashoffset 滾動描繪;
+// data-dotted-path 是掛鉤)。垂直填滿父層。
+interface Props {
+  color?: string;
+  class?: string;
+}
+const { color = 'var(--color-bubblegum)', class: cls = '' } = Astro.props;
+---
+
+<svg
+  class={`dotted-path ${cls}`}
+  preserveAspectRatio="none"
+  viewBox="0 0 8 100"
+  aria-hidden="true"
+>
+  <line
+    x1="4"
+    y1="0"
+    x2="4"
+    y2="100"
+    stroke={color}
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-dasharray="0.1 8"
+    data-dotted-path></line>
+</svg>
+
+<style>
+  .dotted-path {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    height: 100%;
+  }
+</style>

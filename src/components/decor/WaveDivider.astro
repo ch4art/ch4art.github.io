@@ -1,0 +1,23 @@
+---
+// 波浪分隔線(比扇貝更柔的變體;頁尾用)。SVG 滿寬拉伸。
+interface Props {
+  color: string;
+  flip?: boolean;
+  /** 高度 px */
+  height?: number;
+  class?: string;
+}
+const { color, flip = false, height = 48, class: cls = '' } = Astro.props;
+---
+
+<svg
+  class={cls}
+  style={`display:block;width:100%;height:${height}px;${flip ? 'transform:scaleY(-1);' : ''}`}
+  viewBox="0 0 1200 60"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  <path
+    d="M0 30 C 100 0 200 0 300 30 C 400 60 500 60 600 30 C 700 0 800 0 900 30 C 1000 60 1100 60 1200 30 L 1200 60 L 0 60 Z"
+    fill={color}></path>
+</svg>
