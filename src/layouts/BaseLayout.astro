@@ -82,6 +82,11 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : new URL('og.png', As
     <Footer />
 
     <script>
+      // 全站 GSAP 動效(生命週期由 motion.ts 自己管理)
+      import '../scripts/motion';
+    </script>
+
+    <script>
       // 點擊回饋:在點擊處迸出小星星(尊重減少動態偏好;document 層級,
       // 跨 ClientRouter 換頁仍有效,只綁一次)
       function bindSparkles() {
