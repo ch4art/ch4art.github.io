@@ -95,6 +95,29 @@ body {
 }
 
 /* ===================================================================
+   超連結:糖果波浪底線(全站簽名)。
+   文字連結一律波浪線;按鈕/卡片/藥丸型連結(.btn-pop、圖卡、標籤
+   chip…)外型本身就是連結感,不畫線。
+   =================================================================== */
+a {
+  text-decoration: underline wavy var(--color-bubblegum-deep);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+a:hover {
+  text-decoration-color: var(--color-grape);
+}
+a.btn-pop,
+a.brand,
+a.wall-card,
+a.door,
+a.shelf-row,
+a.tag-card,
+a[class*='rounded-pill'] {
+  text-decoration: none;
+}
+
+/* ===================================================================
    Cartoon / Memphis components
    =================================================================== */
 @layer components {
@@ -280,7 +303,9 @@ body {
 }
 .post-body :where(a) {
   color: var(--color-bubblegum-deep);
-  text-decoration: underline;
+  /* 注意:不可寫 text-decoration: underline(shorthand 會把波浪重設成直線) */
+  text-decoration: underline wavy var(--color-bubblegum-deep);
+  text-underline-offset: 4px;
   font-weight: 700;
 }
 .post-body :where(img) {
