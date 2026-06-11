@@ -22,13 +22,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # 步驟拆細是刻意的:在 Actions 頁面能看到現在跑到哪、每步花多久。
+      # (前身是 withastro/action 一顆黑盒,卡住時完全看不出進度。)
+      - name: 📥 Checkout 程式碼
         uses: actions/checkout@v6
-      - name: Build with Astro
-        # Runs `npm ci` + the project's build command, then uploads the
-        # Pages artifact. Our `npm run build` = `astro check && astro build`
-        # (cross-env bumps the Node heap so the three.js type-check passes).
-        uses: withastro/action@v6
+
+      - name: 🟢 安裝 Node 22(含 npm 快取)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 安裝依賴(npm ci)
+        run: npm ci
+
+      - name: 🔍 型別檢查(astro check,heap-bumped)
+        run: npm run check
+
+      - name: 🏗️ 建置網站(astro build)
+        run: npx astro build
+
+      - name: 📤 上傳 Pages 成品(dist/)
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
 
   deploy:
     needs: build
@@ -37,6 +54,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      # 這一步是 GitHub 官方動作,內部(上傳→等 Pages CDN 發佈)無法再拆;
+      # 平常 ~1 分鐘,GitHub 忙的時候可能拖到 5 分鐘,超過 10 分鐘再考慮
+      # gh run cancel 重跑。timeout 設 15 分鐘防真的吊死。
+      - name: 🚀 發佈到 GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        timeout-minutes: 15
