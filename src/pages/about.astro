@@ -1,0 +1,196 @@
+---
+// 關於我:頭像 BlobFrame + 星爆徽章群 + 工具點線軸 + 信封合作表單。
+// (吸收 v1 的 /contact;舊路由由 astro.config redirects 轉過來)
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionTitle from '../components/SectionTitle.astro';
+import BlobFrame from '../components/decor/BlobFrame.astro';
+import StickerBadge from '../components/decor/StickerBadge.astro';
+import Mascot from '../components/decor/Mascot.astro';
+import { withBase } from '../lib/withBase';
+
+// ===== 設定:Web3Forms access key(https://web3forms.com 免費取得,可放前端) =====
+const WEB3FORMS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
+
+const toolSteps = [
+  { emoji: '✏️', label: '鉛筆塗鴉', note: '所有東西的起點' },
+  { emoji: '🖌️', label: 'Procreate / CSP', note: '上色跟畫完它' },
+  { emoji: '🧊', label: 'Blender', note: '把平的捏成立體的' },
+  { emoji: '🌐', label: '這個網站', note: '放出來給大家玩' },
+];
+---
+
+<BaseLayout title="關於我 — ch4art" description="ch4art 是誰?畫畫、捏 3D、養一隻像素老鼠。合作邀約也在這裡。">
+  <!-- ===== 自介 ===== -->
+  <section class="grid items-center gap-10 md:grid-cols-12">
+    <div class="relative mx-auto max-w-[280px] md:col-span-5">
+      <BlobFrame color="var(--color-lavender-mist)">
+        <div class="grid place-items-center p-8">
+          <Mascot size={180} />
+        </div>
+      </BlobFrame>
+      <div class="absolute -right-5 -top-5">
+        <StickerBadge shape="heart" color="var(--color-bubblegum)" tilt={8} size={84}>
+          老鼠<br />本鼠
+        </StickerBadge>
+      </div>
+    </div>
+    <div class="text-center md:col-span-7 md:text-left">
+      <SectionTitle as="h1" text="關於我" emoji="🐭" class="sticker" />
+      <p class="mt-6 font-bold leading-loose text-ink/85">
+        嗨!我是 <span class="text-bubblegum-deep">ch4art</span>,
+        一個喜歡把日常的小可愛收集起來的人:有時候畫成 2D,
+        有時候捏成 3D。這個網站就是我的小展示櫃,
+        畫的放在<a href={withBase('gallery-2d')} class="font-bold text-bubblegum-deep underline">畫廊</a>、
+        捏的放在<a href={withBase('gallery-3d')} class="font-bold text-bubblegum-deep underline">展示間</a>,
+        過程的碎碎念都在<a href={withBase('blog')} class="font-bold text-bubblegum-deep underline">部落格</a>。
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
+        <StickerBadge shape="burst" color="var(--color-butter)" tilt={-6} size={104}>最愛<br />粉紅色</StickerBadge>
+        <StickerBadge shape="circle" color="var(--color-mint)" tilt={4} size={104}>深夜<br />出沒</StickerBadge>
+        <StickerBadge shape="burst" color="var(--color-skyberry)" tilt={-3} size={104}>圓的<br />都喜歡</StickerBadge>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 工具點線軸 ===== -->
+  <section class="mt-20">
+    <SectionTitle text="東西是怎麼生出來的" emoji="🛠️" class="sticker" />
+    <ol class="tool-line mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        toolSteps.map((t) => (
+          <li class="tool-step card-pop relative p-5 text-center" data-anim="pop">
+            <span class="tool-emoji text-4xl">{t.emoji}</span>
+            <p class="mt-2 font-display text-lg font-semibold text-ink">{t.label}</p>
+            <p class="mt-1 text-sm font-bold text-ink/65">{t.note}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- ===== 合作邀約:信紙 + 信封 ===== -->
+  <section class="mx-auto mt-20 max-w-2xl">
+    <SectionTitle text="想找我做點什麼?" emoji="💌" class="sticker" />
+    <p class="mt-4 font-bold text-ink/75">
+      插畫、3D 小模型、吉祥物,或任何可愛的點子。寫封信給我,我會回到你的信箱。
+    </p>
+
+    <div class="envelope relative mt-8">
+      <!-- 信紙 -->
+      <section class="letter card-pop relative z-10 p-6">
+        <form id="contact-form" class="contact-form">
+          <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+          <input type="hidden" name="subject" value="網站合作邀約 💌" />
+          <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" />
+          <label>
+            你的名字
+            <input name="name" required placeholder="怎麼稱呼你?" />
+          </label>
+          <label>
+            你的 Email
+            <input type="email" name="email" required placeholder="我回信的地方" />
+          </label>
+          <label>
+            訊息
+            <textarea name="message" rows="5" required placeholder="想做什麼?大概的想像、時程?"></textarea>
+          </label>
+          <button
+            type="submit"
+            class="btn-pop anim-wiggle mt-2 self-start bg-bubblegum px-7 py-3 text-lg text-ink"
+          >
+            寄出信 ✉️
+          </button>
+          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <!-- 信封口(送出成功時 GSAP 蓋上;data-envelope 是掛鉤) -->
+      <div class="envelope-flap" data-envelope-flap aria-hidden="true"></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* 點線軸:卡片之間的虛線(桌面水平) */
+  .tool-line {
+    position: relative;
+  }
+  @media (min-width: 1024px) {
+    .tool-line::before {
+      content: '';
+      position: absolute;
+      left: 4%;
+      right: 4%;
+      top: 50%;
+      border-top: 4px dotted var(--color-bubblegum);
+      z-index: -1;
+    }
+  }
+  .tool-step {
+    background: #fff;
+  }
+  .tool-emoji {
+    display: inline-block;
+  }
+
+  .envelope {
+    isolation: isolate;
+  }
+  .letter {
+    background:
+      repeating-linear-gradient(
+        transparent 0 calc(2.4rem - 2px),
+        rgba(255, 159, 203, 0.25) calc(2.4rem - 2px) 2.4rem
+      ),
+      #fff;
+  }
+  /* 信封口三角形:平常藏在下面,成功送出時翻上來(phase 8 GSAP) */
+  .envelope-flap {
+    position: absolute;
+    inset: auto 0 -14px 0;
+    height: 56px;
+    background: var(--color-pink-mist);
+    border: 3px solid var(--color-outline);
+    border-radius: 0 0 1.5rem 1.5rem;
+    clip-path: polygon(0 35%, 50% 100%, 100% 35%, 100% 100%, 0 100%);
+    z-index: 0;
+  }
+</style>
+
+<script>
+  function setupContactForm() {
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    const status = document.getElementById('form-status');
+    if (!form || !status || form.dataset.bound) return;
+    form.dataset.bound = 'true';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = '寄出中…';
+      const data = Object.fromEntries(new FormData(form));
+      if (String(data.access_key).startsWith('YOUR_')) {
+        status.textContent = '⚠️ 表單還沒設定(請先填好 Web3Forms 的 access key)。';
+        return;
+      }
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json();
+        if (json.success) {
+          form.reset();
+          status.textContent = '✅ 信寄出去了!我會盡快回你 💖';
+          document.dispatchEvent(new CustomEvent('ch4art:letter-sent'));
+        } else {
+          status.textContent = '⚠️ 送出失敗:' + (json.message || '請稍後再試');
+        }
+      } catch {
+        status.textContent = '⚠️ 網路錯誤,請稍後再試。';
+      }
+    });
+  }
+
+  setupContactForm();
+  document.addEventListener('astro:page-load', setupContactForm);
+</script>

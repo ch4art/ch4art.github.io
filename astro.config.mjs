@@ -14,6 +14,17 @@ export default defineConfig({
   // (If you ever switch to a project page, add base: '/art'.)
   integrations: [react(), mdx(), sitemap()],
 
+  // 舊站路由 → v2 路由(SSG meta-refresh)。art-editor 的成功 URL 與
+  // 既有外部連結都還指向 /portfolio,不可 404。
+  redirects: {
+    '/portfolio': '/gallery-3d',
+    // TODO(phase 6):gallery-3d/[id].astro 建好後解除註解
+    // '/portfolio/[id]': '/gallery-3d/[id]',
+    '/contact': '/about',
+  },
+
+  prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
+
   vite: {
     plugins: [tailwindcss()],
     ssr: {

@@ -1,14 +1,44 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Mascot from '../components/decor/Mascot.astro';
 import { withBase } from '../lib/withBase';
 ---
 
-<BaseLayout title="找不到頁面">
-  <section class="text-center py-16">
-    <h1 class="sticker title-pop text-8xl" data-text="404">404</h1>
-    <p class="mt-6 text-lg text-ink/80 font-bold">哎呀,這個頁面跑掉了 🫧</p>
-    <a href={withBase('')} class="btn-pop anim-wiggle bg-bubblegum text-ink text-lg px-7 py-3 mt-8">
-      回首頁
+<BaseLayout title="找不到頁面 — ch4art">
+  <section class="relative py-16 text-center">
+    <h1 class="sticker title-pop title-pop-hero text-hero" data-text="404" data-hero-title>404</h1>
+    <div class="mt-8 flex justify-center" data-hero-model>
+      <Mascot mood="cry" size={150} class="anim-bob" />
+    </div>
+    <p class="mt-6 text-lg font-bold text-ink/80">這個頁面跑去玩躲貓貓了,連老鼠都找不到牠 🫧</p>
+    <a href={withBase('')} class="btn-pop anim-wiggle mt-8 inline-block bg-bubblegum px-7 py-3 text-lg text-ink">
+      帶我回家 🏠
     </a>
+
+    <!-- 緩慢漂浮的星星(GSAP 漂移;reduced-motion 時靜止) -->
+    <span class="lost-star" style="top:8%;left:16%;color:var(--color-butter);" data-float-star aria-hidden="true">★</span>
+    <span class="lost-star" style="top:22%;right:14%;color:var(--color-skyberry);" data-float-star aria-hidden="true">✦</span>
+    <span class="lost-star" style="bottom:18%;left:22%;color:var(--color-grape);" data-float-star aria-hidden="true">✧</span>
+    <span class="lost-star" style="bottom:10%;right:20%;color:var(--color-strawberry);" data-float-star aria-hidden="true">★</span>
   </section>
 </BaseLayout>
+
+<style>
+  .lost-star {
+    position: absolute;
+    font-size: 1.8rem;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lost-star {
+      animation: floaty 7s ease-in-out infinite;
+    }
+    .lost-star:nth-of-type(2) {
+      animation-delay: 1.2s;
+    }
+    .lost-star:nth-of-type(3) {
+      animation-delay: 2.4s;
+    }
+  }
+</style>
