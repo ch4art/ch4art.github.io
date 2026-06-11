@@ -13,6 +13,10 @@ permissions:
   pages: write
   id-token: write
 
+# GitHub 2026/6/16 起強制 JS 動作跑 Node 24 —— 提前切換,趁現在驗證沒問題
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # Allow one concurrent deployment; don't cancel an in-progress run.
 concurrency:
   group: pages
@@ -28,7 +32,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: 🟢 安裝 Node 22(含 npm 快取)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -43,7 +47,7 @@ jobs:
         run: npx astro build
 
       - name: 📤 上傳 Pages 成品(dist/)
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
