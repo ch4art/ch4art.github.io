@@ -205,6 +205,10 @@ const fan = [-8, -1, 7];
     );
     /* 點點覆在漸層上,跟頁面底紋呼應 */
     background-blend-mode: normal;
+    /* 粉紅延伸到頁面最頂(鑽到 sticky 導覽列底下),內容位置不變。
+       -9rem 足以蓋過手機版兩行高的導覽列;多拉的部分被頁頂裁掉,無害 */
+    margin-top: -9rem;
+    padding-top: 9rem;
   }
   .hero::after {
     content: '';
