@@ -1,0 +1,200 @@
+---
+// 2D 畫廊:瑪薩利亞貼紙牆 + 標籤糖果篩選 + <dialog> 燈箱。
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import MasonryWall from '../../components/gallery/MasonryWall.astro';
+import StickerBadge from '../../components/decor/StickerBadge.astro';
+import ScallopDivider from '../../components/decor/ScallopDivider.astro';
+
+const drawings = (await getCollection('drawings', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const allTags = [...new Set(drawings.flatMap((d) => d.data.tags))];
+const chipColors = [
+  'var(--color-bubblegum)',
+  'var(--color-skyberry)',
+  'var(--color-mint)',
+  'var(--color-butter)',
+  'var(--color-lavender)',
+];
+---
+
+<BaseLayout
+  title="畫畫的牆 — ch4art"
+  description="ch4art 的 2D 畫作牆:塗鴉、插畫、過程小圖,全部貼在這面牆上。"
+  fullBleed
+>
+  <ScallopDivider color="var(--color-pink-mist)" flip size={20} />
+  <div class="bg-pink-mist pb-16">
+    <section class="mx-auto max-w-6xl px-4 pt-10">
+      <div class="flex flex-wrap items-center justify-between gap-6">
+        <SectionTitle as="h1" text="畫畫的牆" emoji="🖍️" class="sticker" />
+        <StickerBadge shape="burst" color="var(--color-butter)" tilt={6} size={104}>
+          ✿ {drawings.length} 張<br />塗鴉
+        </StickerBadge>
+      </div>
+
+      {
+        allTags.length > 0 && (
+          <div class="mt-6 flex flex-wrap gap-2.5" data-filter-bar role="group" aria-label="用標籤篩選畫作">
+            <button class="chip chip-active" data-filter="" aria-pressed="true" style="--chip-c:#fff;">
+              全部
+            </button>
+            {allTags.map((t, i) => (
+              <button class="chip" data-filter={t} aria-pressed="false" style={`--chip-c:${chipColors[i % chipColors.length]};`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="mt-10">
+        {
+          drawings.length === 0 ? (
+            <p class="card-pop p-10 text-center font-bold text-ink/60">牆還空著,畫正在路上 🖍️</p>
+          ) : (
+            <MasonryWall drawings={drawings} />
+          )
+        }
+      </div>
+    </section>
+  </div>
+  <ScallopDivider color="var(--color-pink-mist)" size={20} />
+
+  <!-- ===== 燈箱 ===== -->
+  <dialog id="lightbox" class="lb" aria-labelledby="lb-title">
+    <div class="lb-body">
+      <img id="lb-img" class="lb-img" src="" alt="" />
+      <div class="lb-meta">
+        <h2 id="lb-title" class="font-display text-xl text-ink"></h2>
+        <p id="lb-desc" class="mt-1 text-sm font-bold text-ink/70"></p>
+        <p id="lb-tools" class="mt-1 text-sm font-bold text-ink/60"></p>
+      </div>
+      <button id="lb-close" class="lb-btn lb-close btn-pop bg-bubblegum" aria-label="關閉">✕</button>
+      <button id="lb-prev" class="lb-btn lb-prev btn-pop bg-butter" aria-label="上一張">←</button>
+      <button id="lb-next" class="lb-btn lb-next btn-pop bg-butter" aria-label="下一張">→</button>
+    </div>
+  </dialog>
+</BaseLayout>
+
+<style>
+  .chip {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--color-ink);
+    background: var(--chip-c, #fff);
+    border: 2.5px solid var(--color-outline);
+    border-radius: 9999px;
+    padding: 6px 16px;
+    opacity: 0.62;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+  }
+  .chip:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  .chip-active {
+    opacity: 1;
+    box-shadow: var(--shadow-pop-sm);
+    transform: translateY(-1px) rotate(-1deg);
+  }
+
+  /* ===== 燈箱 ===== */
+  .lb {
+    border: none;
+    background: transparent;
+    padding: 0;
+    /* Tailwind v4 preflight 把 margin 歸零,會毀掉 <dialog> 的原生置中 */
+    margin: auto;
+    max-width: min(92vw, 1100px);
+    max-height: 92vh;
+    overflow: visible;
+  }
+  .lb::backdrop {
+    background: rgba(58, 46, 69, 0.55);
+    backdrop-filter: blur(3px);
+  }
+  .lb-body {
+    position: relative;
+    background: #fff;
+    border: 3px solid var(--color-outline);
+    border-radius: var(--radius-blob);
+    box-shadow: var(--shadow-pop-lg);
+    padding: 14px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lb[open] .lb-body {
+      animation: lb-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+  @keyframes lb-pop {
+    from {
+      transform: scale(0.86) rotate(-1.5deg);
+      opacity: 0;
+    }
+  }
+  .lb-img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(82vh - 90px);
+    margin: 0 auto;
+    border-radius: var(--radius-soft);
+    background: var(--color-pink-mist);
+  }
+  .lb-meta {
+    text-align: center;
+    padding: 10px 8px 4px;
+  }
+  .lb-btn {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--color-ink);
+  }
+  .lb-close {
+    top: -16px;
+    right: -14px;
+  }
+  .lb-prev {
+    left: -14px;
+    top: 50%;
+    margin-top: -22px;
+  }
+  .lb-next {
+    right: -14px;
+    top: 50%;
+    margin-top: -22px;
+  }
+  @media (max-width: 640px) {
+    .lb-prev {
+      left: 6px;
+    }
+    .lb-next {
+      right: 6px;
+    }
+    .lb-close {
+      right: 6px;
+    }
+  }
+</style>
+
+<script>
+  import { initLightbox, initFilters } from '../../scripts/lightbox';
+
+  function init() {
+    initLightbox();
+    initFilters();
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

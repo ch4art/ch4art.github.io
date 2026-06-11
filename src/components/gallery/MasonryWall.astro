@@ -1,0 +1,143 @@
+---
+// 瑪薩利亞貼紙牆:12 欄 CSS Grid + 12 種「配方」循環(span/傾斜/圓角),
+// 非 CSS columns —— DOM 順序 = 視覺順序,GSAP batch stagger 進場才不會亂跳;
+// 固定 grid-auto-rows = 零 CLS。手機收成 2 欄方格。
+// 配方靈感來自 ch-4.art/gallery-2d.html mockup。
+import { Image, getImage } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  drawings: CollectionEntry<'drawings'>[];
+}
+const { drawings } = Astro.props;
+
+// i%12 配方:[col-span, row-span, rotate(deg), radius]
+const RECIPES: [number, number, number, string][] = [
+  [5, 5, -1.5, 'var(--radius-blob)'],
+  [4, 4, 2, 'var(--radius-squish)'],
+  [3, 4, -2.5, 'var(--radius-soft)'],
+  [4, 5, 1, 'var(--radius-blob)'],
+  [4, 4, -1, 'var(--radius-squish)'],
+  [4, 4, 2.5, 'var(--radius-soft)'],
+  [6, 5, -2, 'var(--radius-blob)'],
+  [3, 4, 1.5, 'var(--radius-soft)'],
+  [3, 4, -1, 'var(--radius-squish)'],
+  [4, 5, 2, 'var(--radius-blob)'],
+  [5, 4, -2.5, 'var(--radius-soft)'],
+  [3, 4, 1, 'var(--radius-blob)'],
+];
+
+// 每張畫先在建置期算好 lightbox 用的大圖 URL(1600w webp)
+const cards = await Promise.all(
+  drawings.map(async (d, i) => {
+    const full = await getImage({ src: d.data.image, width: 1600, format: 'webp' });
+    const [c, r, rot, radius] = RECIPES[i % RECIPES.length];
+    return { d, full: full.src, c, r, rot, radius };
+  }),
+);
+---
+
+<div class="wall" data-wall>
+  {
+    cards.map(({ d, full, c, r, rot, radius }, i) => (
+      <a
+        class="wall-card"
+        href={`#${d.id}`}
+        style={`--wc-c:${c};--wc-r:${r};--wc-rot:${rot}deg;--wc-radius:${radius};--wc-accent:${d.data.accent ?? 'var(--color-bubblegum)'};`}
+        data-anim="wall-item"
+        data-slug={d.id}
+        data-title={d.data.title}
+        data-desc={d.data.description ?? ''}
+        data-alt={d.data.alt}
+        data-full={full}
+        data-tools={d.data.tools.join('、')}
+        data-tags={d.data.tags.join(',')}
+        aria-label={`放大看「${d.data.title}」`}
+      >
+        <Image
+          src={d.data.image}
+          alt={d.data.alt}
+          widths={[420, 760, 1200]}
+          sizes="(min-width: 768px) 33vw, 50vw"
+          loading={i < 4 ? 'eager' : 'lazy'}
+          fetchpriority={i < 2 ? 'high' : 'auto'}
+          decoding="async"
+          class="wall-img"
+        />
+        <span class="wall-cap">{d.data.title}</span>
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .wall {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .wall {
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: 80px;
+      grid-auto-flow: dense;
+      gap: 20px;
+    }
+  }
+
+  .wall-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 3px solid var(--color-outline);
+    border-radius: var(--wc-radius, var(--radius-blob));
+    box-shadow: var(--shadow-pop);
+    overflow: hidden;
+    padding: 8px;
+    transform: rotate(var(--wc-rot, 0deg));
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s ease;
+    /* 手機:正方形卡 */
+    aspect-ratio: 1 / 1;
+  }
+  @media (min-width: 768px) {
+    .wall-card {
+      grid-column: span var(--wc-c, 4);
+      grid-row: span var(--wc-r, 4);
+      aspect-ratio: auto;
+    }
+  }
+  @media (hover: hover) {
+    /* hover:「扶正歪掉的照片」 */
+    .wall-card:hover {
+      transform: rotate(0deg) translate(-3px, -5px);
+      box-shadow: var(--shadow-pop-lg);
+      z-index: 3;
+    }
+  }
+  .wall-card:focus-visible {
+    outline: 4px solid var(--wc-accent);
+    outline-offset: 3px;
+  }
+
+  .wall-img {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    border-radius: calc(var(--wc-radius, 1.75rem) - 8px);
+    background: var(--color-pink-mist);
+  }
+  .wall-cap {
+    flex: none;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    text-align: center;
+    padding-top: 6px;
+  }
+</style>
