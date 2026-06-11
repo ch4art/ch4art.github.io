@@ -47,7 +47,11 @@ const rowMists = ['var(--color-butter-mist)', 'var(--color-mint-mist)', 'var(--c
               />
             </svg>
             <!-- client:only 在 hydrate 前是空的 —— 外層固定高度防 CLS -->
-            <div class="relative z-10" style="height:420px;">
+            <!-- 模型加上粗黑卡通外框 -->
+            <div
+              class="relative z-10 overflow-hidden rounded-[2rem] border-[5px] border-outline shadow-pop"
+              style="height:420px;"
+            >
               <ModelViewer
                 client:only="react"
                 src={modelUrl(star.data.model)}
@@ -58,11 +62,7 @@ const rowMists = ['var(--color-butter-mist)', 'var(--color-mint-mist)', 'var(--c
                 turntable
               />
             </div>
-            <!-- 展示台(半圓地板) -->
-            <svg class="pedestal-floor" viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M2 22 A 48 40 0 0 1 98 22 Z" fill="var(--color-skyberry)" stroke="var(--color-outline)" stroke-width="2" />
-            </svg>
-            <div class="relative z-10 -mt-2 text-center">
+            <div class="relative z-10 mt-6 text-center">
               <h2 class="title-pop inline-block text-3xl" data-text={star.data.title}>{star.data.title}</h2>
               <p class="mt-2 font-bold text-ink/75">{star.data.description}</p>
               <a
@@ -141,11 +141,5 @@ const rowMists = ['var(--color-butter-mist)', 'var(--color-mint-mist)', 'var(--c
     margin-left: -120px;
     z-index: 0;
     pointer-events: none;
-  }
-  .pedestal-floor {
-    display: block;
-    width: 78%;
-    height: 30px;
-    margin: -10px auto 0;
   }
 </style>
