@@ -1,5 +1,6 @@
 ---
-// 有機 blob 外框:非對稱圓角 + 粗框 + hard shadow(hero 模型 / about 頭像)。
+// 圓角方框:粗框 + hard shadow(hero 模型 / about 頭像)。
+// 使用者指定:全站不用不規則形,一律規則圓角方形。
 interface Props {
   color?: string; // 內底色
   class?: string;
@@ -16,7 +17,7 @@ const { color = 'var(--color-pink-mist)', class: cls = '' } = Astro.props;
     position: relative;
     background: var(--bf-c);
     border: 4px solid var(--color-outline);
-    border-radius: var(--radius-squish);
+    border-radius: 2rem;
     box-shadow: var(--shadow-pop-lg);
     overflow: hidden;
   }
