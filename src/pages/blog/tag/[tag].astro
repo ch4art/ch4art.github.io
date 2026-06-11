@@ -1,5 +1,7 @@
 ---
+// 標籤頁:便利貼風(跟部落格索引一致),但不重排時間軸,單欄即可。
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import WashiTape from '../../../components/decor/WashiTape.astro';
 import { getCollection } from 'astro:content';
 import { withBase } from '../../../lib/withBase';
 
@@ -18,29 +20,59 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props;
+const noteColors = ['var(--color-butter)', 'var(--color-lavender)', 'var(--color-mint)'];
+const tapeColors = ['var(--color-bubblegum)', 'var(--color-aqua)', 'var(--color-sunshine)'];
 ---
 
-<BaseLayout title={`#${tag} 的文章`}>
-  <a href={withBase('blog')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回部落格</a>
-  <h1 class="sticker title-pop text-5xl mt-5 mb-7" data-text={`#${tag}`}>#{tag}</h1>
+<BaseLayout title={`#${tag} 的文章 — ch4art`}>
+  <a href={withBase('blog')} class="btn-pop bg-skyberry px-4 py-1.5 text-sm text-ink">← 回部落格</a>
+  <h1 class="sticker title-pop mb-8 mt-5 text-5xl" data-text={`#${tag}`}>#{tag}</h1>
 
-  <ul class="grid gap-6 sm:grid-cols-2">
+  <ul class="mx-auto grid max-w-2xl gap-8">
     {
-      posts.map((post) => (
-        <li class="card-pop anim-wiggle p-5 transition-transform hover:-translate-y-1">
-          <a
-            href={withBase(`blog/${post.id}`)}
-            class="font-display text-xl text-ink hover:text-bubblegum-deep"
-          >
+      posts.map((post, i) => (
+        <li
+          class="tag-note relative"
+          style={`--note-c:${noteColors[i % 3]};--note-tilt:${i % 2 === 0 ? -1.2 : 1.4}deg;`}
+        >
+          <WashiTape color={tapeColors[i % 3]} tilt={i % 2 === 0 ? -7 : 6} />
+          <a href={withBase(`blog/${post.id}`)} class="note-title">
             {post.data.private && '🔒 '}
             {post.data.title}
           </a>
-          <p class="text-sm text-ink/60 font-bold mt-1">
-            {post.data.pubDate.toLocaleDateString('zh-TW')}
-          </p>
-          <p class="mt-2 text-sm">{post.data.description}</p>
+          <p class="mt-1 text-sm font-bold text-ink/60">{post.data.pubDate.toLocaleDateString('zh-TW')}</p>
+          <p class="mt-2 text-sm font-semibold text-ink/80">{post.data.description}</p>
         </li>
       ))
     }
   </ul>
 </BaseLayout>
+
+<style>
+  .tag-note {
+    background: var(--note-c);
+    border: 3px solid var(--color-outline);
+    border-radius: 4px 18px 14px 16px / 14px 6px 18px 10px;
+    box-shadow: var(--shadow-pop);
+    padding: 1.4rem 1.2rem 1.1rem;
+    transform: rotate(var(--note-tilt, 0deg));
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.22s ease;
+  }
+  @media (hover: hover) {
+    .tag-note:hover {
+      transform: rotate(0deg) translateY(-4px);
+      box-shadow: var(--shadow-pop-lg);
+    }
+  }
+  .note-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-ink);
+  }
+  .note-title:hover {
+    color: var(--color-bubblegum-deep);
+    text-decoration: underline wavy;
+  }
+</style>

@@ -29,7 +29,9 @@ export default defineConfig({
     ssr: {
       // three / R3F are browser-only. client:only already keeps them out of
       // SSR; this is belt-and-suspenders for any transitive import.
-      noExternal: ['three', '@react-three/fiber', '@react-three/drei'],
+      // detect-gpu:drei 的 CJS 依賴 —— dev 模式的 SSR module runner 抓不到
+      // 它的 named export(build 沒事),一起交給 Vite 轉譯就好。
+      noExternal: ['three', '@react-three/fiber', '@react-three/drei', 'detect-gpu'],
     },
   },
 });

@@ -1,5 +1,8 @@
 ---
+// 文章頁:mist 色帶頭 + 糖果條紋閱讀進度條 + 文末「看完啦」橡皮章 +
+// 行李吊牌前後導覽。私密文 AES-GCM 解鎖 script 原樣沿用 v1(契約勿動)。
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StampSeal from '../../components/decor/StampSeal.astro';
 import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import { withBase } from '../../lib/withBase';
@@ -22,42 +25,58 @@ const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
-  <article class="mx-auto max-w-3xl">
-    <a href={withBase('blog')} class="btn-pop bg-skyberry text-ink text-sm px-4 py-1.5">← 回部落格</a>
-    <h1 class="sticker title-pop text-4xl mt-5" data-text={post.data.title}>{post.data.title}</h1>
-    <p class="text-ink/60 font-bold mt-2">{post.data.pubDate.toLocaleDateString('zh-TW')}</p>
+<BaseLayout
+  title={`${post.data.title} — ch4art`}
+  description={post.data.description}
+  ogImage={post.data.heroImage?.src}
+>
+  <!-- 閱讀進度:糖果條紋,GSAP scrub 驅動(motion.ts) -->
+  <div class="read-progress bg-candy-stripe" data-read-progress aria-hidden="true"></div>
 
-    {
-      post.data.tags.length > 0 && (
-        <ul class="flex flex-wrap gap-2 mt-3">
-          {post.data.tags.map((t) => (
-            <li>
-              <a
-                href={withBase(`blog/tag/${t}`)}
-                class="inline-block text-xs font-bold px-3 py-1 rounded-pill bg-lavender text-ink border-2 border-outline hover:bg-bubblegum hover:text-white transition-colors"
-              >
-                #{t}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+  <article class="mx-auto max-w-3xl">
+    <!-- mist 色帶頭 -->
+    <header class="head-band relative">
+      <a href={withBase('blog')} class="btn-pop bg-skyberry px-4 py-1.5 text-sm text-ink">← 回部落格</a>
+      <h1 class="sticker title-pop mt-5 text-4xl md:text-5xl" data-text={post.data.title}>
+        {post.data.title}
+      </h1>
+      <time class="postmark" datetime={post.data.pubDate.toISOString()}>
+        <span>{post.data.pubDate.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })}</span>
+        <span class="postmark-y">{post.data.pubDate.getFullYear()}</span>
+      </time>
+
+      {
+        post.data.tags.length > 0 && (
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {post.data.tags.map((t, i) => (
+              <li>
+                <a
+                  href={withBase(`blog/tag/${t}`)}
+                  class="inline-block rounded-pill border-2 border-outline bg-white px-3 py-1 text-xs font-bold text-ink transition-colors hover:bg-bubblegum hover:text-white"
+                  style={`transform:rotate(${i % 2 === 0 ? -1.5 : 1.5}deg);`}
+                >
+                  #{t}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
 
     {
       post.data.heroImage && (
         <Image
           src={post.data.heroImage}
           alt={post.data.heroImageAlt ?? ''}
-          class="rounded-blob shadow-soft my-5 w-full h-auto"
+          class="rounded-blob shadow-soft my-6 h-auto w-full"
         />
       )
     }
 
     {
       post.data.private && post.data.cipher ? (
-        <div class="post-body mt-5" id="private-root" data-cipher={post.data.cipher}>
+        <div class="post-body mt-6" id="private-root" data-cipher={post.data.cipher}>
           <div class="lockbox" id="lockbox">
             <div class="lock-emoji">🔒</div>
             <p class="font-bold">這是一篇私密文章,輸入通關密語才能看喔</p>
@@ -79,7 +98,7 @@ const { Content } = await render(post);
           </div>
         </div>
       ) : (
-        <div class="post-body mt-5">
+        <div class="post-body mt-6">
           <Content />
         </div>
       )
@@ -202,25 +221,26 @@ const { Content } = await render(post);
       document.addEventListener('astro:page-load', setup);
     </script>
 
+    <!-- 文末橡皮章(GSAP 在捲到底時砸下來) -->
+    <div class="mt-12 text-center">
+      <StampSeal text="看完啦 ✦" />
+    </div>
+
     {
       (newer || older) && (
-        <nav class="flex justify-between gap-3 mt-12">
+        <nav class="mt-10 grid gap-4 sm:grid-cols-2" aria-label="前後文章">
           {older ? (
-            <a
-              href={withBase(`blog/${older.id}`)}
-              class="btn-pop bg-butter text-ink text-sm px-4 py-2 max-w-[46%]"
-            >
-              ← 較舊:{older.data.title}
+            <a href={withBase(`blog/${older.id}`)} class="card-pop anim-wiggle block p-4">
+              <span class="text-xs font-bold text-ink/55">← 較舊</span>
+              <p class="font-display text-lg text-ink">{older.data.title}</p>
             </a>
           ) : (
             <span />
           )}
           {newer ? (
-            <a
-              href={withBase(`blog/${newer.id}`)}
-              class="btn-pop bg-mint text-ink text-sm px-4 py-2 max-w-[46%] text-right"
-            >
-              較新:{newer.data.title} →
+            <a href={withBase(`blog/${newer.id}`)} class="card-pop anim-wiggle block p-4 text-right">
+              <span class="text-xs font-bold text-ink/55">較新 →</span>
+              <p class="font-display text-lg text-ink">{newer.data.title}</p>
             </a>
           ) : (
             <span />
@@ -230,3 +250,50 @@ const { Content } = await render(post);
     }
   </article>
 </BaseLayout>
+
+<style>
+  .read-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    z-index: 40;
+    transform: scaleX(0);
+    transform-origin: left;
+    border-bottom: 2px solid var(--color-outline);
+  }
+
+  .head-band {
+    background: var(--color-pink-mist);
+    border: 3px solid var(--color-outline);
+    border-radius: var(--radius-scoop);
+    box-shadow: var(--shadow-pop);
+    padding: 1.5rem 1.5rem 1.6rem;
+  }
+
+  .postmark {
+    position: absolute;
+    top: -16px;
+    right: 18px;
+    width: 68px;
+    height: 68px;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    background: #fff;
+    border: 2.5px dashed var(--color-bubblegum-deep);
+    border-radius: 50%;
+    transform: rotate(8deg);
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.1;
+    color: var(--color-bubblegum-deep);
+    box-shadow: 0 0 0 3px #fff;
+  }
+  .postmark-y {
+    font-size: 0.64rem;
+    opacity: 0.75;
+  }
+</style>

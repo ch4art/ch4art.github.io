@@ -1,51 +1,200 @@
 ---
+// 部落格索引:垂直點線時間軸(非卡片網格)。文章 = 交錯兩側的傾斜便利貼
+// (奶油/薰衣草/薄荷循環 + 紙膠帶),日期 = 圓形郵戳;頂部標籤 =「貼紙紙」。
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import DottedPath from '../../components/decor/DottedPath.astro';
+import WashiTape from '../../components/decor/WashiTape.astro';
 import { getCollection } from 'astro:content';
 import { withBase } from '../../lib/withBase';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
 );
+
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+
+const noteColors = ['var(--color-butter)', 'var(--color-lavender)', 'var(--color-mint)'];
+const tapeColors = ['var(--color-bubblegum)', 'var(--color-aqua)', 'var(--color-sunshine)'];
+const tilts = [-1.4, 1.8, -0.8, 1.2];
+const chipColors = [
+  'var(--color-bubblegum)',
+  'var(--color-skyberry)',
+  'var(--color-mint)',
+  'var(--color-butter)',
+  'var(--color-lavender)',
+];
 ---
 
-<BaseLayout title="部落格">
-  <h1 class="sticker title-pop text-5xl mb-7" data-text="部落格">部落格 ✏️</h1>
+<BaseLayout title="部落格 — ch4art" description="畫畫、建模與做東西的碎碎念,全部釘在這條線上。">
+  <div class="flex flex-wrap items-end justify-between gap-6">
+    <SectionTitle as="h1" text="部落格" emoji="✏️" class="sticker" />
+    {
+      allTags.length > 0 && (
+        <div class="perforated bg-white/80 px-4 py-3">
+          <p class="mb-2 font-label text-xs font-bold tracking-wide text-ink/60">撕一張標籤 ↓</p>
+          <ul class="flex max-w-md flex-wrap gap-2">
+            {allTags.map((t, i) => (
+              <li>
+                <a
+                  href={withBase(`blog/tag/${t}`)}
+                  class="inline-block rounded-pill border-2 border-outline px-3 py-1 text-xs font-bold text-ink transition-transform hover:-translate-y-0.5 hover:rotate-2"
+                  style={`background:${chipColors[i % chipColors.length]};`}
+                >
+                  #{t}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
 
   {
     posts.length === 0 ? (
-      <div class="card-pop p-8 text-center font-bold text-ink/70">還沒有文章,敬請期待 ✨</div>
+      <div class="card-pop mt-10 p-8 text-center font-bold text-ink/70">還沒有文章,敬請期待 ✨</div>
     ) : (
-      <ul class="grid gap-6 sm:grid-cols-2">
-        {posts.map((post) => (
-          <li class="card-pop anim-wiggle p-5 transition-transform hover:-translate-y-1">
-            <a
-              href={withBase(`blog/${post.id}`)}
-              class="font-display text-xl text-ink hover:text-bubblegum-deep"
-            >
-              {post.data.private && '🔒 '}
-              {post.data.title}
-            </a>
-            <p class="text-sm text-ink/60 font-bold mt-1">
-              {post.data.pubDate.toLocaleDateString('zh-TW')}
-            </p>
-            <p class="mt-2 text-sm">{post.data.description}</p>
-            {post.data.tags.length > 0 && (
-              <ul class="flex flex-wrap gap-2 mt-4">
-                {post.data.tags.map((t) => (
-                  <li>
-                    <a
-                      href={withBase(`blog/tag/${t}`)}
-                      class="inline-block text-xs font-bold px-3 py-1 rounded-pill bg-lavender text-ink border-2 border-outline hover:bg-bubblegum hover:text-white transition-colors"
-                    >
-                      #{t}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
+      <div class="timeline relative mt-12">
+        <DottedPath class="tl-path" color="var(--color-bubblegum)" />
+        <ol class="space-y-12 md:space-y-16">
+          {posts.map((post, i) => (
+            <li class="tl-row relative md:grid md:grid-cols-2 md:gap-20">
+              <span class="tl-node" aria-hidden="true" />
+              <article
+                class:list={['note relative', i % 2 === 1 && 'md:col-start-2']}
+                style={`--note-c:${noteColors[i % 3]};--note-tilt:${tilts[i % 4]}deg;`}
+                data-anim="note"
+              >
+                <WashiTape color={tapeColors[i % 3]} tilt={i % 2 === 0 ? -7 : 6} />
+                <time class="postmark" datetime={post.data.pubDate.toISOString()}>
+                  <span>{post.data.pubDate.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })}</span>
+                  <span class="postmark-y">{post.data.pubDate.getFullYear()}</span>
+                </time>
+                <a href={withBase(`blog/${post.id}`)} class="note-title">
+                  {post.data.private && <span class="lock-sticker" title="私密文章">🔒</span>}
+                  {post.data.title}
+                </a>
+                <p class="mt-2 text-sm font-semibold leading-relaxed text-ink/75">{post.data.description}</p>
+                {post.data.tags.length > 0 && (
+                  <ul class="mt-3 flex flex-wrap gap-2">
+                    {post.data.tags.map((t) => (
+                      <li>
+                        <a
+                          href={withBase(`blog/tag/${t}`)}
+                          class="inline-block rounded-pill border-2 border-outline bg-white/85 px-2.5 py-0.5 text-xs font-bold text-ink hover:bg-bubblegum hover:text-white"
+                        >
+                          #{t}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            </li>
+          ))}
+        </ol>
+      </div>
     )
   }
 </BaseLayout>
+
+<style>
+  /* 時間軸脊椎:桌面置中、手機靠左 */
+  .timeline :global(.tl-path) {
+    left: 18px;
+  }
+  @media (min-width: 768px) {
+    .timeline :global(.tl-path) {
+      left: 50%;
+      margin-left: -4px;
+    }
+  }
+
+  .tl-node {
+    position: absolute;
+    top: 2.4rem;
+    left: 18px;
+    width: 18px;
+    height: 18px;
+    margin-left: -5px;
+    border-radius: 50%;
+    background: var(--color-bubblegum-deep);
+    border: 3px solid #fff;
+    outline: 2.5px solid var(--color-outline);
+    z-index: 1;
+  }
+  @media (min-width: 768px) {
+    .tl-node {
+      left: 50%;
+      margin-left: -9px;
+    }
+  }
+
+  .note {
+    display: block;
+    background: var(--note-c);
+    border: 3px solid var(--color-outline);
+    border-radius: 4px 18px 14px 16px / 14px 6px 18px 10px; /* 手撕便利貼的不規則角 */
+    box-shadow: var(--shadow-pop);
+    padding: 1.4rem 1.2rem 1.1rem;
+    margin-left: 44px;
+    transform: rotate(var(--note-tilt, 0deg));
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.22s ease;
+  }
+  @media (min-width: 768px) {
+    .note {
+      margin-left: 0;
+    }
+  }
+  @media (hover: hover) {
+    .note:hover {
+      transform: rotate(0deg) translateY(-4px);
+      box-shadow: var(--shadow-pop-lg);
+    }
+  }
+
+  .note-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .note-title:hover {
+    color: var(--color-bubblegum-deep);
+    text-decoration: underline wavy;
+  }
+  .lock-sticker {
+    display: inline-block;
+    margin-right: 4px;
+    transform: rotate(-8deg);
+  }
+
+  /* 圓形郵戳 */
+  .postmark {
+    position: absolute;
+    top: -14px;
+    right: 14px;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    background: #fff;
+    border: 2.5px dashed var(--color-bubblegum-deep);
+    border-radius: 50%;
+    transform: rotate(8deg);
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.1;
+    color: var(--color-bubblegum-deep);
+    box-shadow: 0 0 0 3px #fff;
+  }
+  .postmark-y {
+    font-size: 0.62rem;
+    opacity: 0.75;
+  }
+</style>
