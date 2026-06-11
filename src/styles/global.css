@@ -180,15 +180,6 @@ body {
     box-shadow: var(--shadow-sticker-sm);
   }
 
-  /* 棋盤格帶(MarqueeBand / 分隔帶背景) */
-  .bg-checker {
-    background-image: repeating-conic-gradient(
-      var(--checker-a, var(--color-butter)) 0% 25%,
-      var(--checker-b, #fff) 0% 50%
-    );
-    background-size: 36px 36px;
-  }
-
   /* 45° 糖果條紋(閱讀進度條 / 紙膠帶) */
   .bg-candy-stripe {
     background-image: repeating-linear-gradient(

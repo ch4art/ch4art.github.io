@@ -7,7 +7,6 @@ import BlobFrame from '../components/decor/BlobFrame.astro';
 import RotatingBadge from '../components/decor/RotatingBadge.astro';
 import SpeechBubble from '../components/decor/SpeechBubble.astro';
 import ScallopDivider from '../components/decor/ScallopDivider.astro';
-import MarqueeBand from '../components/decor/MarqueeBand.astro';
 import PolaroidFrame from '../components/decor/PolaroidFrame.astro';
 import { modelUrl } from '../lib/model';
 import { withBase } from '../lib/withBase';
@@ -45,15 +44,15 @@ const fan = [-8, -1, 7];
             <!-- client:only 在 hydrate 前是空的 —— 外層固定高度防 CLS;
                  poster 放在靜態 background-image,首繪就到位(LCP) -->
             <div
-              style={`height:380px;background:#FFF7F2 url('${withBase('works/duck-poster.webp')}') center/contain no-repeat;`}
+              style={`height:380px;background:#FFF7F2 url('${withBase('works/mouse-poster.webp')}') center/contain no-repeat;`}
             >
               <LazyModelViewer
                 client:only="react"
-                src={modelUrl('duck.glb')}
-                environment="sunset"
+                src={modelUrl('mouse.glb')}
+                environment="studio"
                 height="100%"
                 background="#FFF7F2"
-                poster={withBase('works/duck-poster.webp')}
+                poster={withBase('works/mouse-poster.webp')}
               />
             </div>
           </BlobFrame>
@@ -81,15 +80,6 @@ const fan = [-8, -1, 7];
     </span>
   </section>
   <ScallopDivider color="var(--color-bubblegum)" size={22} />
-
-  <!-- ===== 跑馬燈帶 ===== -->
-  <div class="mt-12 md:mt-16">
-    <MarqueeBand
-      items={['畫畫', '建模', '塗鴉', '3D', '貼紙', '可愛優先']}
-      checkerA="var(--color-butter)"
-      checkerB="#fff"
-    />
-  </div>
 
   <!-- ===== 雙門廊:今天想看哪一種? ===== -->
   <section class="mx-auto mt-16 max-w-6xl px-4">
@@ -150,10 +140,10 @@ const fan = [-8, -1, 7];
             <circle cx="64" cy="6" r="5" fill="var(--color-sunshine)"></circle>
           </svg>
           <div class="overflow-hidden rounded-[1.5rem] border-[3px] border-outline bg-white p-2 shadow-pop">
-            <!-- 門廊用 2KB webp(449KB 的轉圈 GIF 留給 gallery-3d 本人) -->
+            <!-- 門廊用小 webp(轉圈 GIF 留給 gallery-3d 本人) -->
             <img
-              src={withBase('works/duck-poster.webp')}
-              alt="小鴨 3D 模型"
+              src={withBase('works/mouse-poster.webp')}
+              alt="小鼠鼠 3D 模型"
               width="260"
               height="260"
               loading="lazy"
