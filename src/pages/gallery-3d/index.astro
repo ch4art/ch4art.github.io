@@ -46,12 +46,13 @@ const rowMists = ['var(--color-butter-mist)', 'var(--color-mint-mist)', 'var(--c
                 opacity="0.55"
               />
             </svg>
-            <div class="relative z-10">
+            <!-- client:only 在 hydrate 前是空的 —— 外層固定高度防 CLS -->
+            <div class="relative z-10" style="height:420px;">
               <ModelViewer
                 client:only="react"
                 src={modelUrl(star.data.model)}
                 environment={star.data.environment}
-                height={420}
+                height="100%"
                 background={star.data.accent ?? '#FFF7F2'}
                 poster={withBase(`works/${star.data.poster ?? star.data.thumb}`)}
                 turntable

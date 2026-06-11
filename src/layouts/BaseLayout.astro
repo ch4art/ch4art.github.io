@@ -3,9 +3,15 @@ import { ClientRouter } from 'astro:transitions';
 import '@fontsource-variable/fredoka';
 import '@fontsource-variable/baloo-2';
 import '@fontsource-variable/nunito';
-// 圓胖中文標題字型(粉圓 Huninn)— 只載繁中子集,讓中文標題跟英文一樣可愛。
-import '@fontsource/huninn/chinese-traditional-400.css';
-import '@fontsource/huninn/latin-400.css';
+// 圓胖中文標題字型(粉圓 Huninn)。
+// ⚠️ 要用 400.css(111 片 unicode-range 切片,瀏覽器只抓頁面用到的字
+// ≈ 100-300KB)—— chinese-traditional-400.css 是 1.3MB 的單體檔,
+// v1 就是誤用它把行動版頻寬吃光的。
+import '@fontsource/huninn/400.css';
+// Latin 主字型 preload:搶在首繪前載好,消掉大標題的字型交換位移(CLS)
+import fredokaWoff2 from '@fontsource-variable/fredoka/files/fredoka-latin-wght-normal.woff2?url';
+import nunitoWoff2 from '@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2?url';
+import balooWoff2 from '@fontsource-variable/baloo-2/files/baloo-2-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -40,6 +46,9 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : new URL('og.png', As
     <link rel="canonical" href={canonical} />
     <!-- favicon is a public/ file → needs the base prefix -->
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="preload" as="font" type="font/woff2" href={fredokaWoff2} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={nunitoWoff2} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={balooWoff2} crossorigin />
     <link
       rel="alternate"
       type="application/rss+xml"

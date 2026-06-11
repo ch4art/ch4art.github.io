@@ -81,26 +81,27 @@ const chipColors = [
 </BaseLayout>
 
 <style>
+  /* 未選 = 白底(ink 文字對比 12:1);選中/hover 才上糖果色。
+     不用整顆淡化(opacity)—— 那會把文字對比拉到 2.x,過不了 AA。 */
   .chip {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: 0.92rem;
     color: var(--color-ink);
-    background: var(--chip-c, #fff);
+    background: #fff;
     border: 2.5px solid var(--color-outline);
     border-radius: 9999px;
     padding: 6px 16px;
-    opacity: 0.62;
     transition:
-      opacity 0.15s ease,
+      background 0.15s ease,
       transform 0.15s ease;
   }
   .chip:hover {
-    opacity: 1;
+    background: var(--chip-c, #fff);
     transform: translateY(-2px);
   }
   .chip-active {
-    opacity: 1;
+    background: var(--chip-c, #fff);
     box-shadow: var(--shadow-pop-sm);
     transform: translateY(-1px) rotate(-1deg);
   }

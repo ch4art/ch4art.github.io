@@ -16,7 +16,8 @@ function heroIntro(): void {
   const title = document.querySelector('[data-hero-title]');
   if (!title) return;
   const tl = gsap.timeline({ defaults: { ease: 'back.out(1.6)' } });
-  tl.from(title, { autoAlpha: 0, scale: 0.6, y: 36, duration: 0.65 })
+  // 標題不動 opacity:它是 LCP 元素,藏起來會把 LCP 推遲到 JS 跑完
+  tl.from(title, { scale: 0.6, y: 36, duration: 0.65 })
     .from('[data-hero-sub]', { autoAlpha: 0, y: 22, duration: 0.45, ease: 'power2.out' }, '-=0.25')
     .from(
       '[data-hero-model]',
@@ -32,12 +33,14 @@ function heroIntro(): void {
 function batchPops(): void {
   const items = gsap.utils.toArray<HTMLElement>('[data-anim="pop"]');
   if (!items.length) return;
-  gsap.set(items, { autoAlpha: 0, y: 24, scale: 0.94 });
+  // 標題用純 opacity(非 autoAlpha):visibility:hidden 會把 h2 從
+  // 無障礙樹拿掉,axe 的 heading-order 變成 h1→h3 跳號
+  gsap.set(items, { opacity: 0, y: 24, scale: 0.94 });
   ScrollTrigger.batch(items, {
     start: 'top 88%',
     once: true,
     onEnter: (els) =>
-      gsap.to(els, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.5)', stagger: 0.08 }),
+      gsap.to(els, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.5)', stagger: 0.08 }),
   });
 }
 

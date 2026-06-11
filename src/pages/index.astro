@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ModelViewer from '../components/three/ModelViewer.tsx';
+import LazyModelViewer from '../components/three/LazyModelViewer.tsx';
 import SectionTitle from '../components/SectionTitle.astro';
 import BlobFrame from '../components/decor/BlobFrame.astro';
 import RotatingBadge from '../components/decor/RotatingBadge.astro';
@@ -42,13 +42,20 @@ const fan = [-8, -1, 7];
         <!-- 鴨鴨溢出 hero 下緣,壓在扇貝分隔線上 -->
         <div class="relative mx-auto max-w-sm translate-y-8 md:translate-y-14">
           <BlobFrame color="#FFF7F2">
-            <ModelViewer
-              client:only="react"
-              src={modelUrl('duck.glb')}
-              environment="sunset"
-              height={380}
-              background="#FFF7F2"
-            />
+            <!-- client:only 在 hydrate 前是空的 —— 外層固定高度防 CLS;
+                 poster 放在靜態 background-image,首繪就到位(LCP) -->
+            <div
+              style={`height:380px;background:#FFF7F2 url('${withBase('works/duck-poster.webp')}') center/contain no-repeat;`}
+            >
+              <LazyModelViewer
+                client:only="react"
+                src={modelUrl('duck.glb')}
+                environment="sunset"
+                height="100%"
+                background="#FFF7F2"
+                poster={withBase('works/duck-poster.webp')}
+              />
+            </div>
           </BlobFrame>
           <div class="absolute -right-6 -top-8 hidden sm:block" data-hero-badge>
             <RotatingBadge text="CH4ART • 2D × 3D • CUTE" size={110} color="var(--color-outline)">
@@ -143,9 +150,10 @@ const fan = [-8, -1, 7];
             <circle cx="64" cy="6" r="5" fill="var(--color-sunshine)"></circle>
           </svg>
           <div class="overflow-hidden rounded-[1.5rem] border-[3px] border-outline bg-white p-2 shadow-pop">
+            <!-- 門廊用 2KB webp(449KB 的轉圈 GIF 留給 gallery-3d 本人) -->
             <img
-              src={withBase('works/duck.gif')}
-              alt="旋轉中的小鴨 3D 模型"
+              src={withBase('works/duck-poster.webp')}
+              alt="小鴨 3D 模型"
               width="260"
               height="260"
               loading="lazy"
@@ -154,7 +162,7 @@ const fan = [-8, -1, 7];
             />
           </div>
         </div>
-        <p class="mt-5 text-center text-sm font-bold text-ink/70">每一隻都可以拖著轉圈圈</p>
+        <p class="mt-5 text-center text-sm font-bold text-ink">每一隻都可以拖著轉圈圈</p>
       </a>
     </div>
   </section>
